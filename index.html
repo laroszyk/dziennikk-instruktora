@@ -45,4 +45,31 @@
   <!-- Cwałek: pływający przycisk czatu -->
   <button id="cwalek-btn" title="Porozmawiaj z Cwałkiem" aria-label="Otwórz czat z Cwałkiem">🐴</button>
 
-  <!--
+  <!-- Cwałek: panel czatu -->
+  <div id="cwalek-panel" class="cwalek-panel hidden" role="dialog" aria-label="Cwałek — asystent stajni">
+    <div class="cwalek-header">
+      <span class="cwalek-avatar">🐴</span>
+      <div>
+        <div class="cwalek-name">Cwałek</div>
+        <div class="cwalek-sub">asystent stajni</div>
+      </div>
+      <button class="cwalek-close" id="cwalek-close" aria-label="Zamknij">✕</button>
+    </div>
+    <div class="cwalek-messages" id="cwalek-messages">
+      <div class="cwalek-msg cwalek-msg--bot">
+        <p>Cześć! Jestem Cwałek 🐴 Pytaj o jeźdźców, treningi, postępy — chętnie pomogę!</p>
+      </div>
+    </div>
+    <div class="cwalek-input-row">
+      <input type="text" id="cwalek-input" placeholder="Napisz do Cwałka…" autocomplete="off" />
+      <button id="cwalek-send" aria-label="Wyślij">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
