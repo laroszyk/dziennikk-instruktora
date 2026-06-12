@@ -705,3 +705,5 @@ const CWALEK_FN_URL = `${SUPABASE_URL}/functions/v1/chat-agent`;
     input.focus();
   }
 })();
+
+init();
