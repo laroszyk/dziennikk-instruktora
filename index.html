@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dziennik Instruktora</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Ekran logowania -->
+  <div id="view-login" class="login-wrap hidden">
+    <div class="login-card">
+      <h1>Dziennik<sup>°</sup></h1>
+      <p class="subtitle">Twoi jeźdźcy, konie i treningi w jednym miejscu</p>
+      <form id="login-form">
+        <label class="f">E-mail</label>
+        <input class="f" id="email" type="email" autocomplete="email" required />
+        <label class="f">Hasło</label>
+        <input class="f" id="password" type="password" autocomplete="current-password" required />
+        <button type="submit" class="btn-primary">Zaloguj się</button>
+        <p id="login-error" class="error hidden"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Aplikacja -->
+  <div id="view-app" class="hidden">
+    <main id="content"></main>
+    <nav class="tabbar">
+      <button class="tab active" data-screen="start" title="Start">
+        <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></button>
+      <button class="tab" data-screen="jezdzcy" title="Jeźdźcy">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5"/></svg></button>
+      <button class="tab-plus" id="btn-plus" title="Nowy trening">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="tab" data-screen="konie" title="Konie">
+        <svg viewBox="0 0 24 24"><path d="M4 21V11l5-7 3 2 8-3-2 6v12"/><path d="M9 21v-5h6v5"/></svg></button>
+      <button class="tab" data-screen="treningi" title="Treningi">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14v17H5z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></button>
+    </nav>
+  </div>
+
+  <!-- Cwałek: pływający przycisk czatu -->
+  <button id="cwalek-btn" title="Porozmawiaj z Cwałkiem" aria-label="Otwórz czat z Cwałkiem">🐴</button>
+
+  <!--
