@@ -374,9 +374,8 @@ window.renderFormKon = function () {
     <input class="f" id="nk-imie" type="text" />
     <label class="f">Typ</label>
     <select class="f" id="nk-typ">
-      <option value="drobniejszy">drobniejszy</option>
-      <option value="uniwersalny" selected>uniwersalny</option>
-      <option value="mocniejszy">mocniejszy</option>
+      <option value="gorącokrwisty" selected>gorącokrwisty</option>
+      <option value="zimnokrwisty">zimnokrwisty</option>
     </select>
     <label class="f">Charakterystyka</label>
     <textarea class="f" id="nk-opis" rows="3" placeholder="Temperament, do czego się nadaje..."></textarea>
