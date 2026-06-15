@@ -116,9 +116,11 @@ const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").re
 // ===== Logowanie =====
 const viewLogin = document.getElementById("view-login");
 const viewApp = document.getElementById("view-app");
+const tabbar = document.getElementById("tabbar");
 function showView(v) {
   viewLogin.classList.toggle("hidden", v !== "login");
   viewApp.classList.toggle("hidden", v !== "app");
+  tabbar.classList.toggle("hidden", v !== "app");
 }
 document.getElementById("login-form").addEventListener("submit", async e => {
   e.preventDefault();
