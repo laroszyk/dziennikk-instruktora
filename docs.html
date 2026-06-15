@@ -300,6 +300,84 @@
     .t-flag  { color: #c9a96e; }
     .t-hdr   { color: var(--muted); }
 
+    /* ── PAT section ── */
+    .pat-section {
+      padding: 48px 48px 56px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pat-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .pat-section .pat-desc { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    .pat-auth-gate {
+      display: flex; gap: 10px; align-items: center;
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: 8px; padding: 14px 16px; margin-bottom: 24px;
+    }
+    .pat-auth-gate input {
+      flex: 1; background: none; border: none; outline: none;
+      font-family: var(--mono); font-size: 13px; color: var(--text);
+      min-width: 0;
+    }
+    .pat-auth-gate input::placeholder { color: var(--muted); }
+    .pat-auth-gate label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .pat-btn {
+      font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 6px;
+      border: 1px solid var(--border-light); cursor: pointer;
+      background: var(--border); color: var(--text);
+      transition: background .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .pat-btn:hover { background: var(--border-light); }
+    .pat-btn.primary {
+      background: var(--accent); border-color: var(--accent);
+      color: #fff;
+    }
+    .pat-btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .pat-btn.danger { border-color: var(--red-bg); color: var(--red); background: var(--red-bg); }
+    .pat-btn.danger:hover { border-color: var(--red); }
+
+    .pat-create-row {
+      display: flex; gap: 10px; align-items: center; margin-bottom: 24px;
+    }
+    .pat-create-row input {
+      flex: 1; background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: 6px; padding: 8px 12px; outline: none;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--text);
+    }
+    .pat-create-row input::placeholder { color: var(--muted); }
+    .pat-create-row input:focus { border-color: var(--accent); }
+
+    .pat-list { display: flex; flex-direction: column; gap: 1px; }
+    .pat-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+    .pat-item-name { font-weight: 600; font-size: 13px; flex: 1; min-width: 0; }
+    .pat-item-token {
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+      flex: 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .pat-item-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+    .pat-new-token {
+      display: flex; gap: 12px; align-items: center;
+      background: var(--green-bg); border: 1px solid rgba(61,214,140,.25);
+      border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;
+    }
+    .pat-new-token .token-val {
+      flex: 1; font-family: var(--mono); font-size: 12.5px; color: var(--green);
+      word-break: break-all;
+    }
+    .pat-new-token .token-warning {
+      font-size: 12px; color: rgba(61,214,140,.7); margin-top: 4px;
+    }
+
+    .pat-empty { color: var(--muted); font-size: 13px; padding: 20px 0; }
+    .pat-error { color: var(--red); font-size: 13px; margin-bottom: 12px; }
+    .pat-loading { color: var(--muted); font-size: 13px; }
+
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .content { margin-left: 0; }
@@ -330,6 +408,7 @@
       <div class="nav-label">Wprowadzenie</div>
       <a class="nav-item active" href="#overview" onclick="setActive(this)">Przegląd</a>
       <a class="nav-item" href="#auth" onclick="setActive(this)">Autoryzacja</a>
+      <a class="nav-item" href="#tokens" onclick="setActive(this)">Tokeny dostępu</a>
       <a class="nav-item" href="#errors" onclick="setActive(this)">Błędy</a>
     </div>
     <div class="nav-section">
@@ -697,6 +776,40 @@ print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</
       </div>
     </div>
 
+    <!-- Personal Access Tokens -->
+    <span class="anchor" id="tokens"></span>
+    <div class="pat-section">
+      <h2>Personal Access Tokens</h2>
+      <p class="pat-desc">Tokeny pozwalają na dostęp do API bez używania master klucza. Każdy token możesz odwołać osobno. Token jest pokazywany tylko raz — po wygenerowaniu zapisz go.</p>
+
+      <!-- Gate: enter master key -->
+      <div class="pat-auth-gate" id="pat-gate">
+        <label>Master key</label>
+        <input type="password" id="pat-master-input" placeholder="Wklej API_SECRET_KEY aby zarządzać tokenami…" />
+        <button class="pat-btn primary" onclick="patAuth()">Zaloguj</button>
+      </div>
+
+      <!-- Token manager (hidden until authed) -->
+      <div id="pat-manager" style="display:none">
+        <div class="pat-create-row">
+          <input type="text" id="pat-name-input" placeholder="Nazwa tokenu (np. n8n, Make, Claude)" />
+          <button class="pat-btn primary" onclick="patCreate()">+ Generate token</button>
+        </div>
+
+        <div id="pat-new-reveal" style="display:none" class="pat-new-token">
+          <div>
+            <div class="token-val" id="pat-new-val"></div>
+            <div class="token-warning">⚠ Zapisz ten token — nie będzie pokazany ponownie.</div>
+          </div>
+          <button class="pat-btn" onclick="patCopyNew()">Copy</button>
+        </div>
+
+        <div id="pat-error" class="pat-error" style="display:none"></div>
+        <div id="pat-loading" class="pat-loading" style="display:none">Ładowanie…</div>
+        <div id="pat-list" class="pat-list"></div>
+      </div>
+    </div>
+
     <!-- Errors -->
     <span class="anchor" id="errors"></span>
     <div class="errors-section">
@@ -748,8 +861,118 @@ print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</
     });
   }
 
-  // Highlight active nav on scroll
-  const sections = ['overview','auth','create','ask','read','errors'];
+  // ── PAT management ──
+  const PAT_URL = 'https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/manage-tokens';
+  let patMasterKey = sessionStorage.getItem('pat_master_key') || '';
+
+  function patAuth() {
+    const val = document.getElementById('pat-master-input').value.trim();
+    if (!val) return;
+    patMasterKey = val;
+    sessionStorage.setItem('pat_master_key', val);
+    document.getElementById('pat-gate').style.display = 'none';
+    document.getElementById('pat-manager').style.display = 'block';
+    patLoad();
+  }
+
+  // Auto-show manager if key already in session
+  if (patMasterKey) {
+    document.getElementById('pat-gate').style.display = 'none';
+    document.getElementById('pat-manager').style.display = 'block';
+  }
+
+  async function patLoad() {
+    const loading = document.getElementById('pat-loading');
+    const list = document.getElementById('pat-list');
+    const err = document.getElementById('pat-error');
+    loading.style.display = 'block'; list.innerHTML = ''; err.style.display = 'none';
+    try {
+      const res = await fetch(PAT_URL, { headers: { Authorization: `Bearer ${patMasterKey}` } });
+      const data = await res.json();
+      loading.style.display = 'none';
+      if (!res.ok) { showPatError(data.error || 'Błąd serwera'); return; }
+      renderPatList(data.tokens || []);
+    } catch(e) { loading.style.display = 'none'; showPatError('Błąd sieci.'); }
+  }
+
+  function renderPatList(tokens) {
+    const list = document.getElementById('pat-list');
+    if (!tokens.length) {
+      list.innerHTML = '<p class="pat-empty">Brak tokenów. Wygeneruj pierwszy.</p>';
+      return;
+    }
+    list.innerHTML = tokens.map(t => `
+      <div class="pat-item" id="pat-item-${t.id}">
+        <span class="pat-item-name">${escHtml(t.name)}</span>
+        <span class="pat-item-token">${escHtml(t.token_preview)}</span>
+        <span class="pat-item-date">${new Date(t.created_at).toLocaleDateString('pl-PL')}</span>
+        <button class="pat-btn danger" onclick="patRevoke('${t.id}')">Revoke</button>
+      </div>`).join('');
+  }
+
+  async function patCreate() {
+    const nameInput = document.getElementById('pat-name-input');
+    const name = nameInput.value.trim();
+    if (!name) { nameInput.focus(); return; }
+    const err = document.getElementById('pat-error');
+    err.style.display = 'none';
+    document.getElementById('pat-new-reveal').style.display = 'none';
+    try {
+      const res = await fetch(PAT_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${patMasterKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showPatError(data.error || 'Błąd'); return; }
+      document.getElementById('pat-new-val').textContent = data.token;
+      document.getElementById('pat-new-reveal').style.display = 'flex';
+      nameInput.value = '';
+      patLoad();
+    } catch(e) { showPatError('Błąd sieci.'); }
+  }
+
+  async function patRevoke(id) {
+    if (!confirm('Usunąć ten token? Operacja jest nieodwracalna.')) return;
+    try {
+      const res = await fetch(`${PAT_URL}?id=${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${patMasterKey}` },
+      });
+      if (!res.ok) { const d = await res.json(); showPatError(d.error || 'Błąd'); return; }
+      document.getElementById(`pat-item-${id}`)?.remove();
+      const list = document.getElementById('pat-list');
+      if (!list.querySelector('.pat-item')) list.innerHTML = '<p class="pat-empty">Brak tokenów.</p>';
+    } catch(e) { showPatError('Błąd sieci.'); }
+  }
+
+  function patCopyNew() {
+    const val = document.getElementById('pat-new-val').textContent;
+    navigator.clipboard.writeText(val).then(() => {
+      const btn = event.target; btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  function showPatError(msg) {
+    const err = document.getElementById('pat-error');
+    err.textContent = msg; err.style.display = 'block';
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Enter key in master input
+  document.getElementById('pat-master-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') patAuth();
+  });
+
+  // Auto-load tokens if session already has key
+  if (patMasterKey) patLoad();
+
+  // ── Highlight active nav on scroll ──
+  const sections = ['overview','auth','tokens','create','ask','read','errors'];
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {

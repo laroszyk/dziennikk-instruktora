@@ -12,21 +12,27 @@ function json(data: unknown, status = 200) {
   });
 }
 
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-
-  // Auth
+async function authenticate(req: Request, supabase: ReturnType<typeof createClient>): Promise<boolean> {
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.replace("Bearer ", "").trim();
-  const apiKey = Deno.env.get("API_SECRET_KEY");
-  if (!apiKey || token !== apiKey) return json({ error: "Nieautoryzowany dostęp." }, 401);
+  if (!token) return false;
+  const masterKey = Deno.env.get("API_SECRET_KEY");
+  if (masterKey && token === masterKey) return true;
+  const { data } = await supabase.from("api_tokens").select("id").eq("token", token).maybeSingle();
+  return !!data;
+}
 
-  if (req.method !== "POST") return json({ error: "Metoda niedozwolona. Użyj POST." }, 405);
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
+
+  if (!await authenticate(req, supabase)) return json({ error: "Nieautoryzowany dostęp." }, 401);
+
+  if (req.method !== "POST") return json({ error: "Metoda niedozwolona. Użyj POST." }, 405);
 
   let body: Record<string, unknown>;
   try {

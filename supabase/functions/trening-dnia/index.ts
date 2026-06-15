@@ -12,14 +12,25 @@ function json(data: unknown, status = 200) {
   });
 }
 
+async function authenticate(req: Request, supabase: ReturnType<typeof createClient>): Promise<boolean> {
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) return false;
+  const masterKey = Deno.env.get("API_SECRET_KEY");
+  if (masterKey && token === masterKey) return true;
+  const { data } = await supabase.from("api_tokens").select("id").eq("token", token).maybeSingle();
+  return !!data;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Auth
-  const authHeader = req.headers.get("Authorization") || "";
-  const token = authHeader.replace("Bearer ", "").trim();
-  const apiKey = Deno.env.get("API_SECRET_KEY");
-  if (!apiKey || token !== apiKey) return json({ error: "Nieautoryzowany dostęp." }, 401);
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  if (!await authenticate(req, supabase)) return json({ error: "Nieautoryzowany dostęp." }, 401);
 
   if (req.method !== "GET") return json({ error: "Metoda niedozwolona. Użyj GET." }, 405);
 
@@ -30,11 +41,6 @@ Deno.serve(async (req: Request) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) {
     return json({ error: "Nieprawidłowy format daty. Użyj YYYY-MM-DD." }, 400);
   }
-
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
 
   const [{ data: jData }, { data: kData }, { data: treningi, error }] = await Promise.all([
     supabase.from("jezdzcy").select("id, imie"),
