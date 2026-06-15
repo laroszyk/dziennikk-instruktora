@@ -18,6 +18,51 @@ let cwSel = new Set();
 let cwOpen = false;
 const CW_LIMIT = 7;
 
+// ── Custom select ──
+const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>`;
+function initCustomSelects() {
+  document.querySelectorAll('select.f:not([data-cs])').forEach(sel => {
+    sel.dataset.cs = '1';
+    const wrap = document.createElement('div');
+    wrap.className = 'csel';
+    const val = document.createElement('div');
+    val.className = 'csel-val';
+    const span = document.createElement('span');
+    span.textContent = sel.options[sel.selectedIndex]?.text || '';
+    val.appendChild(span);
+    val.innerHTML += CHEVRON;
+    const drop = document.createElement('div');
+    drop.className = 'csel-drop';
+    Array.from(sel.options).forEach(opt => {
+      const item = document.createElement('div');
+      item.className = 'csel-opt' + (opt.selected ? ' active' : '');
+      item.textContent = opt.text;
+      item.addEventListener('click', e => {
+        e.stopPropagation();
+        sel.value = opt.value;
+        wrap.querySelector('.csel-val span').textContent = opt.text;
+        drop.querySelectorAll('.csel-opt').forEach(o => o.classList.remove('active'));
+        item.classList.add('active');
+        wrap.classList.remove('open');
+      });
+      drop.appendChild(item);
+    });
+    val.addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.csel.open').forEach(c => { if (c !== wrap) c.classList.remove('open'); });
+      wrap.classList.toggle('open');
+    });
+    wrap.appendChild(val);
+    wrap.appendChild(drop);
+    sel.style.display = 'none';
+    sel.parentNode.insertBefore(wrap, sel);
+  });
+}
+if (!window._cselOutside) {
+  window._cselOutside = true;
+  document.addEventListener('click', () => document.querySelectorAll('.csel.open').forEach(c => c.classList.remove('open')));
+}
+
 const CWICZENIA = {
   "plac": [
     "Cavaletti w kłusie","Cavaletti w galopie",
@@ -265,6 +310,7 @@ window.renderFormJezdziec = function () {
     <label class="f">Jeździ od</label>
     <input class="f" id="nj-od" type="text" placeholder="np. 2024" />
     <button class="btn-primary" onclick="zapiszJezdzca()">Zapisz jeźdźca</button>`;
+  initCustomSelects();
   window.scrollTo(0, 0);
 };
 window.zapiszJezdzca = async () => {
@@ -382,6 +428,7 @@ window.renderFormKon = function () {
     <label class="f">Link do zdjęcia (opcjonalnie)</label>
     <input class="f" id="nk-foto" type="text" placeholder="https://..." />
     <button class="btn-primary" onclick="zapiszKonia()">Zapisz konia</button>`;
+  initCustomSelects();
   window.scrollTo(0, 0);
 };
 window.zapiszKonia = async () => {
@@ -558,6 +605,7 @@ function updateRiders() {
         <textarea class="f" id="f-nota-${i}" rows="2" placeholder="Indywidualne uwagi..."></textarea>` : ""}
     </div>`;
   }).join("");
+  initCustomSelects();
 }
 
 window.setOcena = (boxId, n) => {
