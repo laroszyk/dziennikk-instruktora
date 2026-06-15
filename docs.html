@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Docs · Dziennik Instruktora</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1f1f1f;
+      --border-light: #2a2a2a;
+      --text: #ededed;
+      --muted: #888;
+      --accent: #7c6f5b;
+      --accent-hover: #a08f78;
+      --green: #3dd68c;
+      --green-bg: #0d2a1a;
+      --blue: #52a8ff;
+      --blue-bg: #0c1f35;
+      --orange: #f5a623;
+      --orange-bg: #2a1a05;
+      --red: #ff6b6b;
+      --red-bg: #2a0d0d;
+      --sidebar-w: 240px;
+      --content-max: 720px;
+      --mono: 'Geist Mono', 'Fira Code', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 52px;
+      background: rgba(10,10,10,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 24px; gap: 16px;
+    }
+    .topbar-brand {
+      font-weight: 700; font-size: 15px; color: var(--text);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .topbar-brand span { color: var(--muted); font-weight: 400; }
+    .topbar-sep { color: var(--border-light); font-size: 20px; line-height: 1; }
+    .topbar-badge {
+      font-size: 11px; font-weight: 600; letter-spacing: .04em;
+      background: var(--border); color: var(--muted);
+      padding: 2px 8px; border-radius: 4px;
+    }
+    .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .topbar-link {
+      font-size: 13px; color: var(--muted); text-decoration: none;
+      padding: 4px 10px; border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    .topbar-link:hover { color: var(--text); background: var(--border); }
+    .topbar-back {
+      font-size: 13px; color: var(--muted); text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 6px;
+      border: 1px solid var(--border);
+      transition: color .15s, border-color .15s;
+    }
+    .topbar-back:hover { color: var(--text); border-color: var(--border-light); }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      padding-top: 52px;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 52px; left: 0; bottom: 0;
+      width: var(--sidebar-w);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 24px 0 40px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+    .nav-section { margin-bottom: 24px; padding: 0 16px; }
+    .nav-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 0 8px; margin-bottom: 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 6px;
+      font-size: 13px; color: var(--muted);
+      text-decoration: none; cursor: pointer;
+      transition: color .15s, background .15s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover { color: var(--text); background: var(--border); }
+    .nav-item.active { color: var(--text); background: var(--border); font-weight: 600; }
+    .nav-item .method {
+      font-size: 10px; font-weight: 700; font-family: var(--mono);
+      padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+    }
+    .method.post { background: var(--green-bg); color: var(--green); }
+    .method.get  { background: var(--blue-bg);  color: var(--blue);  }
+
+    /* ── Content ── */
+    .content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .page-header {
+      padding: 48px 48px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h1 {
+      font-size: 28px; font-weight: 700; margin-bottom: 8px;
+    }
+    .page-header p { color: var(--muted); font-size: 15px; max-width: 540px; }
+
+    /* ── Auth section ── */
+    .auth-section {
+      padding: 32px 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .auth-section h2 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+    .auth-note {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: var(--blue-bg); border: 1px solid rgba(82,168,255,.2);
+      border-radius: 8px; padding: 12px 16px;
+      font-size: 13px; color: #acd4ff;
+    }
+    .auth-note svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Endpoint sections ── */
+    .endpoint-section {
+      padding: 48px 48px 56px;
+      border-bottom: 1px solid var(--border);
+    }
+    .endpoint-section:last-child { border-bottom: none; }
+
+    .endpoint-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 6px;
+    }
+    .endpoint-header h2 { font-size: 20px; font-weight: 700; }
+    .method-badge {
+      font-size: 11px; font-weight: 700; font-family: var(--mono);
+      padding: 3px 8px; border-radius: 5px;
+    }
+    .method-badge.post { background: var(--green-bg); color: var(--green); }
+    .method-badge.get  { background: var(--blue-bg);  color: var(--blue);  }
+
+    .endpoint-desc { color: var(--muted); margin-bottom: 28px; font-size: 14px; }
+
+    .url-box {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: 8px; padding: 10px 14px;
+      margin-bottom: 28px; overflow-x: auto;
+    }
+    .url-box code {
+      font-family: var(--mono); font-size: 13px; color: var(--text);
+      white-space: nowrap;
+    }
+    .url-box .method-label {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
+    }
+    .url-box .method-label.post { background: var(--green-bg); color: var(--green); }
+    .url-box .method-label.get  { background: var(--blue-bg);  color: var(--blue);  }
+
+    /* ── Tables ── */
+    .section-label {
+      font-size: 12px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%; border-collapse: collapse;
+      margin-bottom: 28px;
+    }
+    th {
+      text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--muted); letter-spacing: .05em; text-transform: uppercase;
+      padding: 6px 12px; border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      font-size: 13px; vertical-align: top;
+    }
+    td:first-child code {
+      font-family: var(--mono); font-size: 12px;
+      color: #c9a96e; background: rgba(201,169,110,.08);
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .req-badge {
+      font-size: 10px; font-weight: 700; font-family: var(--mono);
+      color: var(--red); background: var(--red-bg);
+      padding: 1px 5px; border-radius: 3px; margin-left: 4px;
+    }
+    .opt-badge {
+      font-size: 10px; font-weight: 600; font-family: var(--mono);
+      color: var(--muted); background: var(--border);
+      padding: 1px 5px; border-radius: 3px; margin-left: 4px;
+    }
+    .type-badge {
+      font-family: var(--mono); font-size: 11px;
+      color: var(--blue); background: var(--blue-bg);
+      padding: 1px 5px; border-radius: 3px;
+    }
+    td .desc { color: var(--muted); }
+
+    /* ── Code blocks ── */
+    .code-block-wrap { margin-bottom: 28px; }
+    .code-tabs {
+      display: flex; gap: 1px;
+      background: var(--border); border-radius: 8px 8px 0 0;
+      overflow: hidden;
+    }
+    .code-tab {
+      font-family: var(--mono); font-size: 11px; font-weight: 600;
+      padding: 7px 14px; cursor: pointer; border: none;
+      background: var(--surface); color: var(--muted);
+      transition: color .15s, background .15s;
+    }
+    .code-tab.active { background: var(--border-light); color: var(--text); }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      position: relative;
+    }
+    pre code {
+      font-family: var(--mono); font-size: 12.5px;
+      color: var(--text); line-height: 1.7;
+    }
+    .copy-btn {
+      position: absolute; top: 10px; right: 12px;
+      font-size: 11px; font-weight: 600; font-family: var(--mono);
+      color: var(--muted); background: var(--border);
+      border: none; border-radius: 5px; padding: 3px 9px;
+      cursor: pointer; transition: color .15s;
+    }
+    .copy-btn:hover { color: var(--text); }
+    .copy-btn.copied { color: var(--green); }
+
+    /* ── Response examples ── */
+    .response-wrap { margin-bottom: 28px; }
+    .response-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+    .response-tab {
+      font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 5px;
+      cursor: pointer; border: 1px solid transparent;
+      background: none; color: var(--muted);
+      transition: all .15s;
+    }
+    .response-tab.ok.active  { color: var(--green); border-color: var(--green); background: var(--green-bg); }
+    .response-tab.err.active { color: var(--red);   border-color: var(--red);   background: var(--red-bg);  }
+    .response-tab:not(.active):hover { color: var(--text); border-color: var(--border-light); }
+    .response-body { display: none; }
+    .response-body.active { display: block; }
+
+    /* ── Errors table ── */
+    .errors-section { margin-top: 48px; padding: 0 48px 56px; }
+    .errors-section h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+    /* ── Divider ── */
+    .anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+
+    /* Syntax colors */
+    .t-key   { color: #8ab4f8; }
+    .t-str   { color: #c3e88d; }
+    .t-num   { color: #f78c6c; }
+    .t-bool  { color: #89ddff; }
+    .t-null  { color: var(--muted); }
+    .t-cmt   { color: var(--muted); font-style: italic; }
+    .t-meth  { color: var(--green); font-weight: 600; }
+    .t-url   { color: var(--blue); }
+    .t-flag  { color: #c9a96e; }
+    .t-hdr   { color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { margin-left: 0; }
+      .page-header, .endpoint-section, .auth-section { padding-left: 20px; padding-right: 20px; }
+      .errors-section { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="topbar">
+  <a class="topbar-brand" href="index.html">Dziennik<sup>°</sup></a>
+  <span class="topbar-sep">/</span>
+  <span class="topbar-badge">API Reference</span>
+  <div class="topbar-right">
+    <a class="topbar-back" href="index.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Wróć do aplikacji
+    </a>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Wprowadzenie</div>
+      <a class="nav-item active" href="#overview" onclick="setActive(this)">Przegląd</a>
+      <a class="nav-item" href="#auth" onclick="setActive(this)">Autoryzacja</a>
+      <a class="nav-item" href="#errors" onclick="setActive(this)">Błędy</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">API</div>
+      <a class="nav-item" href="#create" onclick="setActive(this)">
+        <span class="method post">POST</span> Create
+      </a>
+      <a class="nav-item" href="#ask" onclick="setActive(this)">
+        <span class="method post">POST</span> Ask
+      </a>
+      <a class="nav-item" href="#read" onclick="setActive(this)">
+        <span class="method get">GET</span> Read
+      </a>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- Overview -->
+    <span class="anchor" id="overview"></span>
+    <div class="page-header">
+      <h1>API Reference</h1>
+      <p>REST API do zarządzania dziennikiem treningów. Trzy endpointy pozwalają dodawać wpisy, odpytywać agenta AI i pobierać treningi z danego dnia.</p>
+    </div>
+
+    <!-- Auth -->
+    <span class="anchor" id="auth"></span>
+    <div class="auth-section">
+      <h2>Autoryzacja</h2>
+      <p style="color:var(--muted);margin-bottom:14px;font-size:13px;">Każde żądanie musi zawierać nagłówek <code style="font-family:var(--mono);color:#c9a96e;background:rgba(201,169,110,.08);padding:1px 6px;border-radius:4px">Authorization</code> z tokenem Bearer.</p>
+      <div class="auth-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>Token API znajdziesz w ustawieniach projektu Supabase → Edge Function Secrets → <strong>API_SECRET_KEY</strong>. Nie udostępniaj go publicznie.</span>
+      </div>
+
+      <div class="code-block-wrap" style="margin-top:16px;">
+        <div class="code-tabs">
+          <button class="code-tab active">Nagłówek</button>
+        </div>
+        <pre><code><span class="t-key">Authorization</span>: <span class="t-str">Bearer &lt;API_SECRET_KEY&gt;</span>
+<span class="t-key">Content-Type</span>: <span class="t-str">application/json</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
+    </div>
+
+    <!-- ═══════════════ CREATE ═══════════════ -->
+    <span class="anchor" id="create"></span>
+    <div class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="method-badge post">POST</span>
+        <h2>Create</h2>
+      </div>
+      <p class="endpoint-desc">Dodaje nowy wpis treningowy do bazy. Jeźdźca wyszukuje po imieniu (częściowe dopasowanie). Zwraca błąd, gdy imię jest niejednoznaczne — wtedy podaj dokładniejsze.</p>
+
+      <div class="url-box">
+        <span class="method-label post">POST</span>
+        <code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</code>
+      </div>
+
+      <div class="section-label">Body parameters</div>
+      <table>
+        <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>jezdziec</code><span class="req-badge">required</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Imię jeźdźca (lub fragment). Dopasowanie case-insensitive.</span></td>
+          </tr>
+          <tr>
+            <td><code>kon</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Imię konia. Jeśli nie podano — pole zostaje puste.</span></td>
+          </tr>
+          <tr>
+            <td><code>data</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Data treningu w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiaj.</span></td>
+          </tr>
+          <tr>
+            <td><code>typ_jazdy</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Jeden z: <code style="font-family:var(--mono);font-size:11px">plac</code>, <code style="font-family:var(--mono);font-size:11px">teren</code>, <code style="font-family:var(--mono);font-size:11px">skoki</code>, <code style="font-family:var(--mono);font-size:11px">ujeżdżenie</code>, <code style="font-family:var(--mono);font-size:11px">lonża</code>, <code style="font-family:var(--mono);font-size:11px">inne</code>. Domyślnie <code style="font-family:var(--mono);font-size:11px">plac</code>.</span></td>
+          </tr>
+          <tr>
+            <td><code>ocena</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">number</span></td>
+            <td><span class="desc">Ocena treningu od 1 do 5.</span></td>
+          </tr>
+          <tr>
+            <td><code>cwiczenia</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string[]</span></td>
+            <td><span class="desc">Lista ćwiczeń wykonanych podczas treningu.</span></td>
+          </tr>
+          <tr>
+            <td><code>uwagi</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Ogólne uwagi z treningu.</span></td>
+          </tr>
+          <tr>
+            <td><code>dobrze</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Co poszło dobrze.</span></td>
+          </tr>
+          <tr>
+            <td><code>do_poprawy</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Co wymaga poprawy.</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section-label">Przykładowe żądanie</div>
+      <div class="code-block-wrap">
+        <div class="code-tabs">
+          <button class="code-tab active" onclick="switchTab(this, 'create-curl')">cURL</button>
+          <button class="code-tab" onclick="switchTab(this, 'create-js')">JavaScript</button>
+          <button class="code-tab" onclick="switchTab(this, 'create-py')">Python</button>
+        </div>
+        <pre id="create-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;API_SECRET_KEY&gt;"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{
+    "jezdziec": "Kasia",
+    "kon": "Bryza",
+    "ocena": 4,
+    "typ_jazdy": "plac",
+    "cwiczenia": ["Koła 20 m", "Kłus bez strzemion"],
+    "dobrze": "Dobry rytm w kłusie",
+    "do_poprawy": "Praca łydką w zakrętach"
+  }'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <pre id="create-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>, {
+  method: <span class="t-str">"POST"</span>,
+  headers: {
+    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${API_SECRET_KEY}`</span>,
+    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+  },
+  body: JSON.stringify({
+    jezdziec: <span class="t-str">"Kasia"</span>,
+    kon: <span class="t-str">"Bryza"</span>,
+    ocena: <span class="t-num">4</span>,
+    typ_jazdy: <span class="t-str">"plac"</span>,
+    cwiczenia: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
+    dobrze: <span class="t-str">"Dobry rytm w kłusie"</span>,
+    do_poprawy: <span class="t-str">"Praca łydką w zakrętach"</span>,
+  }),
+});
+<span class="t-key">const</span> data = <span class="t-key">await</span> res.json();
+console.log(data);</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <pre id="create-py" style="display:none"><code><span class="t-key">import</span> requests
+
+res = requests.post(
+    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>,
+    headers={
+        <span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {API_SECRET_KEY}"</span>,
+        <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+    },
+    json={
+        <span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
+        <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>,
+        <span class="t-str">"ocena"</span>: <span class="t-num">4</span>,
+        <span class="t-str">"typ_jazdy"</span>: <span class="t-str">"plac"</span>,
+        <span class="t-str">"cwiczenia"</span>: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
+        <span class="t-str">"dobrze"</span>: <span class="t-str">"Dobry rytm w kłusie"</span>,
+        <span class="t-str">"do_poprawy"</span>: <span class="t-str">"Praca łydką w zakrętach"</span>,
+    },
+)
+print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
+
+      <div class="section-label">Odpowiedź</div>
+      <div class="response-wrap">
+        <div class="response-tabs">
+          <button class="response-tab ok active" onclick="switchResponse(this, 'create-ok')">200 OK</button>
+          <button class="response-tab err" onclick="switchResponse(this, 'create-err')">400 / 404</button>
+        </div>
+        <div class="response-body active" id="create-ok">
+          <pre><code>{
+  <span class="t-key">"id"</span>:       <span class="t-str">"3be52fa6-2fcd-4e81-8820-90aa7d890831"</span>,
+  <span class="t-key">"data"</span>:     <span class="t-str">"2026-06-15"</span>,
+  <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
+  <span class="t-key">"ocena"</span>:    <span class="t-num">4</span>
+}</code></pre>
+        </div>
+        <div class="response-body" id="create-err">
+          <pre><code><span class="t-cmt">// Jeźdźca nie znaleziono</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Nie znaleziono jeźdźca: \"Kasia\"."</span> }
+
+<span class="t-cmt">// Niejednoznaczne imię</span>
+{
+  <span class="t-key">"error"</span>:      <span class="t-str">"Niejednoznaczne imię: \"Ka\". Podaj dokładniejsze imię."</span>,
+  <span class="t-key">"kandydaci"</span>: [<span class="t-str">"Kasia"</span>, <span class="t-str">"Kamila"</span>, <span class="t-str">"Karolina"</span>]
+}
+
+<span class="t-cmt">// Nieprawidłowa ocena</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'ocena' musi być liczbą całkowitą od 1 do 5."</span> }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ASK ═══════════════ -->
+    <span class="anchor" id="ask"></span>
+    <div class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="method-badge post">POST</span>
+        <h2>Ask</h2>
+      </div>
+      <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek. Endpoint automatycznie pobiera kontekst dnia z bazy — nie musisz podawać danych treningów w żądaniu. Agent ma dostęp do pełnej historii i może wyszukiwać dane z innych dni.</p>
+
+      <div class="url-box">
+        <span class="method-label post">POST</span>
+        <code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</code>
+      </div>
+
+      <div class="section-label">Body parameters</div>
+      <table>
+        <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>pytanie</code><span class="req-badge">required</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Pytanie do agenta w dowolnym języku naturalnym.</span></td>
+          </tr>
+          <tr>
+            <td><code>data</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Dzień kontekstu w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Treningi z tego dnia trafiają do promptu systemowego. Domyślnie dzisiaj.</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section-label">Przykładowe żądanie</div>
+      <div class="code-block-wrap">
+        <div class="code-tabs">
+          <button class="code-tab active" onclick="switchTab(this, 'ask-curl')">cURL</button>
+          <button class="code-tab" onclick="switchTab(this, 'ask-js')">JavaScript</button>
+          <button class="code-tab" onclick="switchTab(this, 'ask-py')">Python</button>
+        </div>
+        <pre id="ask-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;API_SECRET_KEY&gt;"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{
+    "pytanie": "Jak postępuje Kasia w ostatnim miesiącu?",
+    "data": "2026-06-15"
+  }'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <pre id="ask-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj"</span>, {
+  method: <span class="t-str">"POST"</span>,
+  headers: {
+    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${API_SECRET_KEY}`</span>,
+    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+  },
+  body: JSON.stringify({
+    pytanie: <span class="t-str">"Jak postępuje Kasia w ostatnim miesiącu?"</span>,
+    data: <span class="t-str">"2026-06-15"</span>,
+  }),
+});
+<span class="t-key">const</span> { odpowiedz } = <span class="t-key">await</span> res.json();
+console.log(odpowiedz);</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <pre id="ask-py" style="display:none"><code>res = requests.post(
+    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj"</span>,
+    headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {API_SECRET_KEY}"</span>},
+    json={
+        <span class="t-str">"pytanie"</span>: <span class="t-str">"Jak postępuje Kasia w ostatnim miesiącu?"</span>,
+        <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+    },
+)
+print(res.json()[<span class="t-str">"odpowiedz"</span>])</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
+
+      <div class="section-label">Odpowiedź</div>
+      <div class="response-wrap">
+        <div class="response-tabs">
+          <button class="response-tab ok active" onclick="switchResponse(this, 'ask-ok')">200 OK</button>
+          <button class="response-tab err" onclick="switchResponse(this, 'ask-err')">400</button>
+        </div>
+        <div class="response-body active" id="ask-ok">
+          <pre><code>{
+  <span class="t-key">"odpowiedz"</span>: <span class="t-str">"Kasia w ostatnim miesiącu miała 6 treningów — oceny wahają się od 3 do 5. Widać wyraźny postęp w galopie, anglezowanie zdecydowanie pewniejsze. Warto teraz skupić się na pracy bez strzemion dla lepszej równowagi. 💪"</span>
+}</code></pre>
+        </div>
+        <div class="response-body" id="ask-err">
+          <pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'pytanie' jest wymagane."</span> }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ READ ═══════════════ -->
+    <span class="anchor" id="read"></span>
+    <div class="endpoint-section">
+      <div class="endpoint-header">
+        <span class="method-badge get">GET</span>
+        <h2>Read</h2>
+      </div>
+      <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia. Imiona jeźdźców i koni są już zdekodowane — bez surowych UUID. Jeśli nie podasz daty, zwraca treningi z dzisiaj.</p>
+
+      <div class="url-box">
+        <span class="method-label get">GET</span>
+        <code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15</code>
+      </div>
+
+      <div class="section-label">Query parameters</div>
+      <table>
+        <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>data</code><span class="opt-badge">optional</span></td>
+            <td><span class="type-badge">string</span></td>
+            <td><span class="desc">Data w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiaj.</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section-label">Przykładowe żądanie</div>
+      <div class="code-block-wrap">
+        <div class="code-tabs">
+          <button class="code-tab active" onclick="switchTab(this, 'read-curl')">cURL</button>
+          <button class="code-tab" onclick="switchTab(this, 'read-js')">JavaScript</button>
+          <button class="code-tab" onclick="switchTab(this, 'read-py')">Python</button>
+        </div>
+        <pre id="read-curl"><code><span class="t-meth">curl</span> <span class="t-url">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;API_SECRET_KEY&gt;"</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <pre id="read-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(
+  <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span>,
+  { headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${API_SECRET_KEY}`</span> } }
+);
+<span class="t-key">const</span> { treningi } = <span class="t-key">await</span> res.json();
+console.log(treningi);</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <pre id="read-py" style="display:none"><code>res = requests.get(
+    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia"</span>,
+    headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {API_SECRET_KEY}"</span>},
+    params={<span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>},
+)
+print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
+
+      <div class="section-label">Odpowiedź</div>
+      <div class="response-wrap">
+        <div class="response-tabs">
+          <button class="response-tab ok active" onclick="switchResponse(this, 'read-ok')">200 OK</button>
+          <button class="response-tab err" onclick="switchResponse(this, 'read-err')">400</button>
+        </div>
+        <div class="response-body active" id="read-ok">
+          <pre><code>{
+  <span class="t-key">"data"</span>:    <span class="t-str">"2026-06-15"</span>,
+  <span class="t-key">"liczba"</span>:  <span class="t-num">2</span>,
+  <span class="t-key">"treningi"</span>: [
+    {
+      <span class="t-key">"id"</span>:         <span class="t-str">"3be52fa6-2fcd-4e81-8820-90aa7d890831"</span>,
+      <span class="t-key">"data"</span>:       <span class="t-str">"2026-06-15"</span>,
+      <span class="t-key">"jezdziec"</span>:   <span class="t-str">"Kasia"</span>,
+      <span class="t-key">"kon"</span>:        <span class="t-str">"Bryza"</span>,
+      <span class="t-key">"typ_jazdy"</span>:  <span class="t-str">"plac"</span>,
+      <span class="t-key">"grupowa"</span>:    <span class="t-bool">false</span>,
+      <span class="t-key">"cwiczenia"</span>:  [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
+      <span class="t-key">"uwagi"</span>:      <span class="t-null">null</span>,
+      <span class="t-key">"dobrze"</span>:     <span class="t-str">"Dobry rytm w kłusie"</span>,
+      <span class="t-key">"do_poprawy"</span>: <span class="t-str">"Praca łydką w zakrętach"</span>,
+      <span class="t-key">"ocena"</span>:      <span class="t-num">4</span>
+    }
+  ]
+}</code></pre>
+        </div>
+        <div class="response-body" id="read-err">
+          <pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Nieprawidłowy format daty. Użyj YYYY-MM-DD."</span> }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Errors -->
+    <span class="anchor" id="errors"></span>
+    <div class="errors-section">
+      <h2>Kody błędów</h2>
+      <table>
+        <thead><tr><th>Kod</th><th>Znaczenie</th></tr></thead>
+        <tbody>
+          <tr><td><code>401</code></td><td><span class="desc">Brak lub nieprawidłowy token Bearer.</span></td></tr>
+          <tr><td><code>400</code></td><td><span class="desc">Błąd walidacji — brakujące pole, niejednoznaczne imię lub nieprawidłowy format.</span></td></tr>
+          <tr><td><code>404</code></td><td><span class="desc">Nie znaleziono jeźdźca lub konia o podanej nazwie.</span></td></tr>
+          <tr><td><code>405</code></td><td><span class="desc">Niedozwolona metoda HTTP.</span></td></tr>
+          <tr><td><code>500</code></td><td><span class="desc">Błąd serwera — problem z bazą danych lub API modelu AI.</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function switchTab(btn, targetId) {
+    const wrap = btn.closest('.code-block-wrap');
+    wrap.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    wrap.querySelectorAll('pre').forEach(p => p.style.display = 'none');
+    document.getElementById(targetId).style.display = 'block';
+  }
+
+  function switchResponse(btn, targetId) {
+    const wrap = btn.closest('.response-wrap');
+    wrap.querySelectorAll('.response-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    wrap.querySelectorAll('.response-body').forEach(b => b.classList.remove('active'));
+    document.getElementById(targetId).classList.add('active');
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('pre');
+    const text = pre.innerText.replace('Copy', '').replace('Copied!', '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // Highlight active nav on scroll
+  const sections = ['overview','auth','create','ask','read','errors'];
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        const link = document.querySelector(`.nav-item[href="#${id}"]`);
+        if (link) {
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          link.classList.add('active');
+        }
+      }
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
+</body>
+</html>
