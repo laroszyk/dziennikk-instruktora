@@ -19,37 +19,22 @@ function generateToken(): string {
   return "dziennik_" + Array.from(array).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-
-  // Auth via master key
+function isMaster(req: Request): boolean {
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.replace("Bearer ", "").trim();
   const masterKey = Deno.env.get("API_SECRET_KEY");
-  if (!masterKey || token !== masterKey) return json({ error: "Nieautoryzowany dostęp." }, 401);
+  return !!masterKey && token === masterKey;
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // GET — lista tokenów
-  if (req.method === "GET") {
-    const { data, error } = await supabase
-      .from("api_tokens")
-      .select("id, name, token, created_at")
-      .order("created_at", { ascending: false });
-    if (error) return json({ error: error.message }, 500);
-    const masked = (data || []).map((t: { id: string; name: string; token: string; created_at: string }) => ({
-      id: t.id,
-      name: t.name,
-      token_preview: t.token.slice(0, 16) + "••••••••" + t.token.slice(-6),
-      created_at: t.created_at,
-    }));
-    return json({ tokens: masked });
-  }
-
-  // POST — utwórz token
+  // POST — generuj token (publiczne, bez auth)
   if (req.method === "POST") {
     let body: { name?: string };
     try { body = await req.json(); } catch { return json({ error: "Nieprawidłowy JSON." }, 400); }
@@ -72,12 +57,30 @@ Deno.serve(async (req: Request) => {
     }, 201);
   }
 
-  // DELETE — revoke tokenu
+  // GET i DELETE — tylko master key
+  if (!isMaster(req)) return json({ error: "Nieautoryzowany dostęp." }, 401);
+
+  // GET — lista tokenów
+  if (req.method === "GET") {
+    const { data, error } = await supabase
+      .from("api_tokens")
+      .select("id, name, token, created_at")
+      .order("created_at", { ascending: false });
+    if (error) return json({ error: error.message }, 500);
+    const masked = (data || []).map((t: { id: string; name: string; token: string; created_at: string }) => ({
+      id: t.id,
+      name: t.name,
+      token_preview: t.token.slice(0, 16) + "••••••••" + t.token.slice(-6),
+      created_at: t.created_at,
+    }));
+    return json({ tokens: masked });
+  }
+
+  // DELETE — revoke
   if (req.method === "DELETE") {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return json({ error: "Parametr 'id' jest wymagany." }, 400);
-
     const { error } = await supabase.from("api_tokens").delete().eq("id", id);
     if (error) return json({ error: error.message }, 500);
     return json({ message: "Token usunięty." });

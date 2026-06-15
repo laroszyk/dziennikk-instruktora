@@ -780,33 +780,39 @@ print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</
     <span class="anchor" id="tokens"></span>
     <div class="pat-section">
       <h2>Personal Access Tokens</h2>
-      <p class="pat-desc">Tokeny pozwalają na dostęp do API bez używania master klucza. Każdy token możesz odwołać osobno. Token jest pokazywany tylko raz — po wygenerowaniu zapisz go.</p>
+      <p class="pat-desc">Wygeneruj token, by uzyskać dostęp do API. Token jest pokazywany tylko raz — po wygenerowaniu zapisz go.</p>
 
-      <!-- Gate: enter master key -->
-      <div class="pat-auth-gate" id="pat-gate">
-        <label>Master key</label>
-        <input type="password" id="pat-master-input" placeholder="Wklej API_SECRET_KEY aby zarządzać tokenami…" />
-        <button class="pat-btn primary" onclick="patAuth()">Zaloguj</button>
+      <!-- Publiczny formularz generowania -->
+      <div class="pat-create-row">
+        <input type="text" id="pat-name-input" placeholder="Nazwa tokenu (np. n8n, Make, Claude)" />
+        <button class="pat-btn primary" onclick="patCreate()">+ Generate token</button>
       </div>
 
-      <!-- Token manager (hidden until authed) -->
-      <div id="pat-manager" style="display:none">
-        <div class="pat-create-row">
-          <input type="text" id="pat-name-input" placeholder="Nazwa tokenu (np. n8n, Make, Claude)" />
-          <button class="pat-btn primary" onclick="patCreate()">+ Generate token</button>
+      <div id="pat-new-reveal" style="display:none" class="pat-new-token">
+        <div>
+          <div class="token-val" id="pat-new-val"></div>
+          <div class="token-warning">⚠ Zapisz ten token — nie będzie pokazany ponownie.</div>
         </div>
+        <button class="pat-btn" onclick="patCopyNew()">Copy</button>
+      </div>
 
-        <div id="pat-new-reveal" style="display:none" class="pat-new-token">
-          <div>
-            <div class="token-val" id="pat-new-val"></div>
-            <div class="token-warning">⚠ Zapisz ten token — nie będzie pokazany ponownie.</div>
+      <div id="pat-error" class="pat-error" style="display:none"></div>
+
+      <!-- Panel admina (lista + revoke) — tylko master key -->
+      <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
+        <div class="section-label">Zarządzanie tokenami (admin)</div>
+        <div class="pat-auth-gate" id="pat-gate" style="margin-top:10px;">
+          <label>Master key</label>
+          <input type="password" id="pat-master-input" placeholder="Wklej API_SECRET_KEY…" />
+          <button class="pat-btn" onclick="patAuth()">Zaloguj</button>
+        </div>
+        <div id="pat-manager" style="display:none">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <button class="pat-btn" onclick="patLogout()" style="font-size:11px;color:var(--muted);">Wyloguj</button>
           </div>
-          <button class="pat-btn" onclick="patCopyNew()">Copy</button>
+          <div id="pat-loading" class="pat-loading" style="display:none">Ładowanie…</div>
+          <div id="pat-list" class="pat-list"></div>
         </div>
-
-        <div id="pat-error" class="pat-error" style="display:none"></div>
-        <div id="pat-loading" class="pat-loading" style="display:none">Ładowanie…</div>
-        <div id="pat-list" class="pat-list"></div>
       </div>
     </div>
 
@@ -863,13 +869,13 @@ print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</
 
   // ── PAT management ──
   const PAT_URL = 'https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/manage-tokens';
-  let patMasterKey = sessionStorage.getItem('pat_master_key') || '';
+  let patMasterKey = localStorage.getItem('pat_master_key') || '';
 
   function patAuth() {
     const val = document.getElementById('pat-master-input').value.trim();
     if (!val) return;
     patMasterKey = val;
-    sessionStorage.setItem('pat_master_key', val);
+    localStorage.setItem('pat_master_key', val);
     document.getElementById('pat-gate').style.display = 'none';
     document.getElementById('pat-manager').style.display = 'block';
     patLoad();
@@ -952,6 +958,14 @@ print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</
       const btn = event.target; btn.textContent = 'Copied!';
       setTimeout(() => btn.textContent = 'Copy', 2000);
     });
+  }
+
+  function patLogout() {
+    localStorage.removeItem('pat_master_key');
+    patMasterKey = '';
+    document.getElementById('pat-manager').style.display = 'none';
+    document.getElementById('pat-gate').style.display = 'flex';
+    document.getElementById('pat-master-input').value = '';
   }
 
   function showPatError(msg) {
