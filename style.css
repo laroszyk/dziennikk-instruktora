@@ -131,6 +131,8 @@ h1.big{font-size:21px;font-weight:700;margin:4px 0 14px;letter-spacing:-.01em;co
 .tab{background:none;border:none;color:#C0C5C0;width:44px;height:44px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;transition:.2s}
 .tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab-icon-img{width:20px;height:20px;filter:brightness(0) opacity(0.25)}
+.tab.active .tab-icon-img{filter:brightness(0) saturate(100%) invert(35%) sepia(30%) saturate(400%) hue-rotate(100deg)}
 .tab.active{background:var(--sage-mist);color:var(--sage-deep)}
 .tab-plus{background:var(--sage);border:none;width:48px;height:48px;border-radius:50%;color:#fff;
   display:flex;align-items:center;justify-content:center;margin:0 4px;transition:.2s;box-shadow:0 6px 16px rgba(110,158,132,.35)}
