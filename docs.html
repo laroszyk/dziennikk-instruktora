@@ -3,852 +3,601 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Docs · Dziennik Instruktora</title>
+  <title>Docs · Dziennik Instruktora</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0a0a0a;
-      --surface: #111111;
-      --border: #1f1f1f;
-      --border-light: #2a2a2a;
-      --text: #ededed;
-      --muted: #888;
-      --accent: #7c6f5b;
-      --accent-hover: #a08f78;
-      --green: #3dd68c;
-      --green-bg: #0d2a1a;
-      --blue: #52a8ff;
-      --blue-bg: #0c1f35;
-      --orange: #f5a623;
-      --orange-bg: #2a1a05;
-      --red: #ff6b6b;
-      --red-bg: #2a0d0d;
-      --sidebar-w: 240px;
-      --content-max: 720px;
-      --mono: 'Geist Mono', 'Fira Code', monospace;
+      --bg: #0a0a0a; --surface: #111; --border: #1f1f1f; --border-light: #2a2a2a;
+      --text: #ededed; --muted: #888; --accent: #7c6f5b; --accent-hover: #a08f78;
+      --green: #3dd68c; --green-bg: #0d2a1a; --blue: #52a8ff; --blue-bg: #0c1f35;
+      --purple: #a78bfa; --purple-bg: #1a1030; --red: #ff6b6b; --red-bg: #2a0d0d;
+      --sidebar-w: 240px; --mono: 'Geist Mono','Fira Code',monospace;
     }
-
     html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans',system-ui,sans-serif; font-size: 14px; line-height: 1.6; min-height: 100vh; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
+    .topbar { position: fixed; top:0; left:0; right:0; z-index:200; height:52px; background: rgba(10,10,10,.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 24px; gap:16px; }
+    .topbar-brand { font-weight:700; font-size:15px; color:var(--text); text-decoration:none; }
+    .topbar-sep { color:var(--border-light); font-size:20px; }
+    .topbar-badge { font-size:11px; font-weight:600; letter-spacing:.04em; background:var(--border); color:var(--muted); padding:2px 8px; border-radius:4px; }
+    .topbar-right { margin-left:auto; }
+    .topbar-back { font-size:13px; color:var(--muted); text-decoration:none; display:flex; align-items:center; gap:6px; padding:5px 12px; border-radius:6px; border:1px solid var(--border); transition:color .15s,border-color .15s; }
+    .topbar-back:hover { color:var(--text); border-color:var(--border-light); }
 
-    /* ── Top bar ── */
-    .topbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      height: 52px;
-      background: rgba(10,10,10,.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; padding: 0 24px; gap: 16px;
-    }
-    .topbar-brand {
-      font-weight: 700; font-size: 15px; color: var(--text);
-      text-decoration: none;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .topbar-brand span { color: var(--muted); font-weight: 400; }
-    .topbar-sep { color: var(--border-light); font-size: 20px; line-height: 1; }
-    .topbar-badge {
-      font-size: 11px; font-weight: 600; letter-spacing: .04em;
-      background: var(--border); color: var(--muted);
-      padding: 2px 8px; border-radius: 4px;
-    }
-    .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-    .topbar-link {
-      font-size: 13px; color: var(--muted); text-decoration: none;
-      padding: 4px 10px; border-radius: 6px;
-      transition: color .15s, background .15s;
-    }
-    .topbar-link:hover { color: var(--text); background: var(--border); }
-    .topbar-back {
-      font-size: 13px; color: var(--muted); text-decoration: none;
-      display: flex; align-items: center; gap: 6px;
-      padding: 5px 12px; border-radius: 6px;
-      border: 1px solid var(--border);
-      transition: color .15s, border-color .15s;
-    }
-    .topbar-back:hover { color: var(--text); border-color: var(--border-light); }
+    .tab-switcher { display:flex; gap:0; border-bottom:1px solid var(--border); background:var(--bg); margin-left:auto; align-self:stretch; }
+    .tab-switch-btn { position:relative; padding:0 20px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; border:none; background:none; height:100%; transition:color .15s; white-space:nowrap; text-decoration:none; display:flex; align-items:center; }
+    .tab-switch-btn:hover { color:var(--text); }
+    .tab-switch-btn.active { color:var(--text); font-weight:600; }
+    .tab-switch-btn.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--text); border-radius:2px 2px 0 0; }
 
-    /* ── Layout ── */
-    .layout {
-      display: flex;
-      padding-top: 52px;
-      min-height: 100vh;
-    }
+    .token-banner { position:fixed; top:52px; left:0; right:0; z-index:150; background:var(--surface); border-bottom:1px solid var(--border); padding:10px 24px 10px calc(var(--sidebar-w) + 24px); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .token-banner label { font-size:12px; font-weight:600; color:var(--muted); white-space:nowrap; }
+    .token-banner input { flex:1; min-width:0; max-width:260px; background:var(--bg); border:1px solid var(--border-light); border-radius:6px; padding:6px 10px; font-family:var(--mono); font-size:12px; color:var(--text); outline:none; }
+    .token-banner input:focus { border-color:var(--accent); }
+    .token-banner input::placeholder { color:var(--muted); }
+    .tb-btn { font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; border:none; cursor:pointer; white-space:nowrap; transition:background .15s; }
+    .tb-btn.primary { background:var(--accent); color:#fff; }
+    .tb-btn.primary:hover { background:var(--accent-hover); }
+    .tb-btn.secondary { background:var(--border); color:var(--text); }
+    .tb-btn.secondary:hover { background:var(--border-light); }
+    .tb-new-token { display:none; align-items:center; gap:8px; background:var(--green-bg); border:1px solid rgba(61,214,140,.25); border-radius:6px; padding:6px 12px; }
+    .tb-new-token .tv { font-family:var(--mono); font-size:12px; color:var(--green); }
+    .tb-new-token .tw { font-size:11px; color:rgba(61,214,140,.6); }
+    .tb-err { font-size:12px; color:var(--red); }
 
-    /* ── Sidebar ── */
-    .sidebar {
-      position: fixed; top: 52px; left: 0; bottom: 0;
-      width: var(--sidebar-w);
-      border-right: 1px solid var(--border);
-      overflow-y: auto;
-      padding: 24px 0 40px;
-    }
-    .sidebar::-webkit-scrollbar { width: 4px; }
-    .sidebar::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+    .layout { display:flex; padding-top:calc(52px + 49px); min-height:100vh; }
 
-    .nav-section { margin-bottom: 24px; padding: 0 16px; }
-    .nav-label {
-      font-size: 11px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--muted);
-      padding: 0 8px; margin-bottom: 4px;
-    }
-    .nav-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 8px; border-radius: 6px;
-      font-size: 13px; color: var(--muted);
-      text-decoration: none; cursor: pointer;
-      transition: color .15s, background .15s;
-      border: none; background: none; width: 100%; text-align: left;
-    }
-    .nav-item:hover { color: var(--text); background: var(--border); }
-    .nav-item.active { color: var(--text); background: var(--border); font-weight: 600; }
-    .nav-item .method {
-      font-size: 10px; font-weight: 700; font-family: var(--mono);
-      padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
-    }
-    .method.post { background: var(--green-bg); color: var(--green); }
-    .method.get  { background: var(--blue-bg);  color: var(--blue);  }
+    .sidebar { position:fixed; top:calc(52px + 49px); left:0; bottom:0; width:var(--sidebar-w); border-right:1px solid var(--border); overflow-y:auto; padding:20px 0 40px; }
+    .sidebar::-webkit-scrollbar { width:4px; }
+    .sidebar::-webkit-scrollbar-thumb { background:var(--border-light); border-radius:4px; }
 
-    /* ── Content ── */
-    .content {
-      margin-left: var(--sidebar-w);
-      flex: 1;
-      min-width: 0;
-    }
+    .tab-pills { display:flex; gap:4px; padding:0 16px; margin-bottom:20px; }
+    .tab-pill { flex:1; padding:6px 0; border-radius:6px; font-size:12px; font-weight:600; text-align:center; cursor:pointer; border:none; background:var(--border); color:var(--muted); transition:background .15s,color .15s; }
+    .tab-pill.active { background:var(--text); color:var(--bg); }
 
-    .page-header {
-      padding: 48px 48px 32px;
-      border-bottom: 1px solid var(--border);
-    }
-    .page-header h1 {
-      font-size: 28px; font-weight: 700; margin-bottom: 8px;
-    }
-    .page-header p { color: var(--muted); font-size: 15px; max-width: 540px; }
+    .nav-section { margin-bottom:20px; padding:0 16px; }
+    .nav-label { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:0 8px; margin-bottom:4px; }
+    .nav-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; font-size:13px; color:var(--muted); text-decoration:none; cursor:pointer; transition:color .15s,background .15s; border:none; background:none; width:100%; text-align:left; }
+    .nav-item:hover { color:var(--text); background:var(--border); }
+    .nav-item.active { color:var(--text); background:var(--border); font-weight:600; }
+    .nav-item .method { font-size:10px; font-weight:700; font-family:var(--mono); padding:1px 5px; border-radius:3px; flex-shrink:0; }
+    .method.post { background:var(--green-bg); color:var(--green); }
+    .method.get  { background:var(--blue-bg);  color:var(--blue);  }
+    .method.tool { background:var(--purple-bg); color:var(--purple); }
+    .nav-label-section { color:var(--text); font-size:12px; border-top:1px solid var(--border); padding-top:16px; margin-bottom:6px; }
+    .nav-section:first-child .nav-label-section { border-top:none; padding-top:0; }
+    .nav-sublabel { font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); padding:10px 8px 4px; }
 
-    /* ── Auth section ── */
-    .auth-section {
-      padding: 32px 48px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-    }
-    .auth-section h2 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
-    .auth-note {
-      display: flex; gap: 12px; align-items: flex-start;
-      background: var(--blue-bg); border: 1px solid rgba(82,168,255,.2);
-      border-radius: 8px; padding: 12px 16px;
-      font-size: 13px; color: #acd4ff;
-    }
-    .auth-note svg { flex-shrink: 0; margin-top: 1px; }
+    .content { margin-left:var(--sidebar-w); flex:1; min-width:0; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
 
-    /* ── Endpoint sections ── */
-    .endpoint-section {
-      padding: 48px 48px 56px;
-      border-bottom: 1px solid var(--border);
-    }
-    .endpoint-section:last-child { border-bottom: none; }
+    .page-header { padding:40px 48px 28px; border-bottom:1px solid var(--border); }
+    .page-header h1 { font-size:26px; font-weight:700; margin-bottom:8px; }
+    .page-header p { color:var(--muted); font-size:14px; max-width:540px; }
 
-    .endpoint-header {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 6px;
-    }
-    .endpoint-header h2 { font-size: 20px; font-weight: 700; }
-    .method-badge {
-      font-size: 11px; font-weight: 700; font-family: var(--mono);
-      padding: 3px 8px; border-radius: 5px;
-    }
-    .method-badge.post { background: var(--green-bg); color: var(--green); }
-    .method-badge.get  { background: var(--blue-bg);  color: var(--blue);  }
+    .auth-section { padding:28px 48px; border-bottom:1px solid var(--border); background:var(--surface); }
+    .auth-section h2 { font-size:15px; font-weight:600; margin-bottom:12px; }
+    .auth-note { display:flex; gap:12px; align-items:flex-start; background:var(--blue-bg); border:1px solid rgba(82,168,255,.2); border-radius:8px; padding:12px 16px; font-size:13px; color:#acd4ff; }
 
-    .endpoint-desc { color: var(--muted); margin-bottom: 28px; font-size: 14px; }
+    .endpoint-section { padding:44px 48px 52px; border-bottom:1px solid var(--border); }
+    .endpoint-section:last-child { border-bottom:none; }
+    .endpoint-header { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+    .endpoint-header h2 { font-size:20px; font-weight:700; }
+    .method-badge { font-size:11px; font-weight:700; font-family:var(--mono); padding:3px 8px; border-radius:5px; }
+    .method-badge.post   { background:var(--green-bg);  color:var(--green);  }
+    .method-badge.get    { background:var(--blue-bg);   color:var(--blue);   }
+    .method-badge.tool   { background:var(--purple-bg); color:var(--purple); }
+    .endpoint-desc { color:var(--muted); margin-bottom:28px; font-size:14px; }
 
-    .url-box {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: 8px; padding: 10px 14px;
-      margin-bottom: 28px; overflow-x: auto;
-    }
-    .url-box code {
-      font-family: var(--mono); font-size: 13px; color: var(--text);
-      white-space: nowrap;
-    }
-    .url-box .method-label {
-      font-family: var(--mono); font-size: 11px; font-weight: 700;
-      padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
-    }
-    .url-box .method-label.post { background: var(--green-bg); color: var(--green); }
-    .url-box .method-label.get  { background: var(--blue-bg);  color: var(--blue);  }
+    .url-box { display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border-light); border-radius:8px; padding:10px 14px; margin-bottom:28px; overflow-x:auto; }
+    .url-box code { font-family:var(--mono); font-size:13px; color:var(--text); white-space:nowrap; }
+    .url-box .method-label { font-family:var(--mono); font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; flex-shrink:0; }
+    .url-box .method-label.post { background:var(--green-bg); color:var(--green); }
+    .url-box .method-label.get  { background:var(--blue-bg);  color:var(--blue);  }
+    .url-box .method-label.tool { background:var(--purple-bg); color:var(--purple); }
 
-    /* ── Tables ── */
-    .section-label {
-      font-size: 12px; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; color: var(--muted);
-      margin-bottom: 10px;
-    }
-    table {
-      width: 100%; border-collapse: collapse;
-      margin-bottom: 28px;
-    }
-    th {
-      text-align: left; font-size: 11px; font-weight: 600;
-      color: var(--muted); letter-spacing: .05em; text-transform: uppercase;
-      padding: 6px 12px; border-bottom: 1px solid var(--border);
-    }
-    td {
-      padding: 10px 12px; border-bottom: 1px solid var(--border);
-      font-size: 13px; vertical-align: top;
-    }
-    td:first-child code {
-      font-family: var(--mono); font-size: 12px;
-      color: #c9a96e; background: rgba(201,169,110,.08);
-      padding: 2px 6px; border-radius: 4px;
-    }
-    .req-badge {
-      font-size: 10px; font-weight: 700; font-family: var(--mono);
-      color: var(--red); background: var(--red-bg);
-      padding: 1px 5px; border-radius: 3px; margin-left: 4px;
-    }
-    .opt-badge {
-      font-size: 10px; font-weight: 600; font-family: var(--mono);
-      color: var(--muted); background: var(--border);
-      padding: 1px 5px; border-radius: 3px; margin-left: 4px;
-    }
-    .type-badge {
-      font-family: var(--mono); font-size: 11px;
-      color: var(--blue); background: var(--blue-bg);
-      padding: 1px 5px; border-radius: 3px;
-    }
-    td .desc { color: var(--muted); }
+    .section-label { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; margin-bottom:28px; }
+    th { text-align:left; font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.05em; text-transform:uppercase; padding:6px 12px; border-bottom:1px solid var(--border); }
+    td { padding:10px 12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:top; }
+    td:first-child code { font-family:var(--mono); font-size:12px; color:#c9a96e; background:rgba(201,169,110,.08); padding:2px 6px; border-radius:4px; }
+    .req-badge { font-size:10px; font-weight:700; font-family:var(--mono); color:var(--red); background:var(--red-bg); padding:1px 5px; border-radius:3px; margin-left:4px; }
+    .opt-badge { font-size:10px; font-weight:600; font-family:var(--mono); color:var(--muted); background:var(--border); padding:1px 5px; border-radius:3px; margin-left:4px; }
+    .type-badge { font-family:var(--mono); font-size:11px; color:var(--blue); background:var(--blue-bg); padding:1px 5px; border-radius:3px; }
+    td .desc { color:var(--muted); }
 
-    /* ── Code blocks ── */
-    .code-block-wrap { margin-bottom: 28px; }
-    .code-tabs {
-      display: flex; gap: 1px;
-      background: var(--border); border-radius: 8px 8px 0 0;
-      overflow: hidden;
-    }
-    .code-tab {
-      font-family: var(--mono); font-size: 11px; font-weight: 600;
-      padding: 7px 14px; cursor: pointer; border: none;
-      background: var(--surface); color: var(--muted);
-      transition: color .15s, background .15s;
-    }
-    .code-tab.active { background: var(--border-light); color: var(--text); }
-    pre {
-      background: var(--surface);
-      border: 1px solid var(--border-light);
-      border-top: none;
-      border-radius: 0 0 8px 8px;
-      padding: 18px 20px;
-      overflow-x: auto;
-      position: relative;
-    }
-    pre code {
-      font-family: var(--mono); font-size: 12.5px;
-      color: var(--text); line-height: 1.7;
-    }
-    .copy-btn {
-      position: absolute; top: 10px; right: 12px;
-      font-size: 11px; font-weight: 600; font-family: var(--mono);
-      color: var(--muted); background: var(--border);
-      border: none; border-radius: 5px; padding: 3px 9px;
-      cursor: pointer; transition: color .15s;
-    }
-    .copy-btn:hover { color: var(--text); }
-    .copy-btn.copied { color: var(--green); }
+    .code-block-wrap { margin-bottom:28px; }
+    .code-tabs { display:flex; gap:1px; background:var(--border); border-radius:8px 8px 0 0; overflow:hidden; }
+    .code-tab { font-family:var(--mono); font-size:11px; font-weight:600; padding:7px 14px; cursor:pointer; border:none; background:var(--surface); color:var(--muted); transition:color .15s,background .15s; }
+    .code-tab.active { background:var(--border-light); color:var(--text); }
+    pre { background:var(--surface); border:1px solid var(--border-light); border-top:none; border-radius:0 0 8px 8px; padding:18px 20px; overflow-x:auto; position:relative; }
+    pre code { font-family:var(--mono); font-size:12.5px; color:var(--text); line-height:1.7; }
+    pre.solo { border-radius:8px; border-top:1px solid var(--border-light); margin-bottom:28px; }
+    .copy-btn { position:absolute; top:10px; right:12px; font-size:11px; font-weight:600; font-family:var(--mono); color:var(--muted); background:var(--border); border:none; border-radius:5px; padding:3px 9px; cursor:pointer; transition:color .15s; }
+    .copy-btn:hover { color:var(--text); }
+    .copy-btn.copied { color:var(--green); }
 
-    /* ── Response examples ── */
-    .response-wrap { margin-bottom: 28px; }
-    .response-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
-    .response-tab {
-      font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 5px;
-      cursor: pointer; border: 1px solid transparent;
-      background: none; color: var(--muted);
-      transition: all .15s;
-    }
-    .response-tab.ok.active  { color: var(--green); border-color: var(--green); background: var(--green-bg); }
-    .response-tab.err.active { color: var(--red);   border-color: var(--red);   background: var(--red-bg);  }
-    .response-tab:not(.active):hover { color: var(--text); border-color: var(--border-light); }
-    .response-body { display: none; }
-    .response-body.active { display: block; }
+    .response-wrap { margin-bottom:28px; }
+    .response-tabs { display:flex; gap:8px; margin-bottom:10px; }
+    .response-tab { font-size:12px; font-weight:600; padding:4px 10px; border-radius:5px; cursor:pointer; border:1px solid transparent; background:none; color:var(--muted); transition:all .15s; }
+    .response-tab.ok.active  { color:var(--green); border-color:var(--green); background:var(--green-bg); }
+    .response-tab.err.active { color:var(--red);   border-color:var(--red);   background:var(--red-bg);  }
+    .response-tab:not(.active):hover { color:var(--text); border-color:var(--border-light); }
+    .response-body { display:none; }
+    .response-body.active { display:block; }
 
-    /* ── Errors table ── */
-    .errors-section { margin-top: 48px; padding: 0 48px 56px; }
-    .errors-section h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+    .errors-section { padding:0 48px 56px; margin-top:44px; }
+    .errors-section h2 { font-size:16px; font-weight:700; margin-bottom:16px; }
 
-    /* ── Divider ── */
-    .anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+    .callout { display:flex; gap:12px; align-items:flex-start; border-radius:8px; padding:14px 16px; font-size:13px; margin-bottom:24px; }
+    .callout.info   { background:var(--blue-bg);   border:1px solid rgba(82,168,255,.2);  color:#acd4ff; }
+    .callout.tip    { background:var(--green-bg);  border:1px solid rgba(61,214,140,.2);  color:#a7f3c9; }
+    .callout.purple { background:var(--purple-bg); border:1px solid rgba(167,139,250,.2); color:#d4bcff; }
+    .callout svg { flex-shrink:0; margin-top:1px; }
 
-    /* Syntax colors */
-    .t-key   { color: #8ab4f8; }
-    .t-str   { color: #c3e88d; }
-    .t-num   { color: #f78c6c; }
-    .t-bool  { color: #89ddff; }
-    .t-null  { color: var(--muted); }
-    .t-cmt   { color: var(--muted); font-style: italic; }
-    .t-meth  { color: var(--green); font-weight: 600; }
-    .t-url   { color: var(--blue); }
-    .t-flag  { color: #c9a96e; }
-    .t-hdr   { color: var(--muted); }
+    .steps { display:flex; flex-direction:column; margin-bottom:28px; }
+    .step { display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); }
+    .step:last-child { border-bottom:none; }
+    .step-num { width:24px; height:24px; border-radius:50%; background:var(--border); color:var(--text); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .step-body h4 { font-size:14px; font-weight:600; margin-bottom:6px; }
+    .step-body p { color:var(--muted); font-size:13px; }
 
-    /* ── PAT section ── */
-    .pat-section {
-      padding: 48px 48px 56px;
-      border-bottom: 1px solid var(--border);
-    }
-    .pat-section h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-    .pat-section .pat-desc { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+    .pat-section { padding:44px 48px 52px; border-bottom:1px solid var(--border); }
+    .pat-section h2 { font-size:20px; font-weight:700; margin-bottom:6px; }
+    .pat-section .pat-desc { color:var(--muted); font-size:14px; margin-bottom:28px; }
+    .pat-auth-gate { display:flex; gap:10px; align-items:center; background:var(--surface); border:1px solid var(--border-light); border-radius:8px; padding:14px 16px; margin-bottom:24px; }
+    .pat-auth-gate input { flex:1; background:none; border:none; outline:none; font-family:var(--mono); font-size:13px; color:var(--text); }
+    .pat-auth-gate input::placeholder { color:var(--muted); }
+    .pat-auth-gate label { font-size:12px; color:var(--muted); white-space:nowrap; }
+    .pat-btn { font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; border:1px solid var(--border-light); cursor:pointer; background:var(--border); color:var(--text); transition:background .15s; white-space:nowrap; }
+    .pat-btn:hover { background:var(--border-light); }
+    .pat-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .pat-btn.danger  { border-color:var(--red-bg); color:var(--red); background:var(--red-bg); }
+    .pat-btn.danger:hover { border-color:var(--red); }
+    .pat-list { display:flex; flex-direction:column; gap:8px; }
+    .pat-item { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 16px; }
+    .pat-item-name { font-weight:600; font-size:13px; flex:1; }
+    .pat-item-token { font-family:var(--mono); font-size:12px; color:var(--muted); flex:2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pat-item-date { font-size:11px; color:var(--muted); white-space:nowrap; }
+    .pat-empty { color:var(--muted); font-size:13px; padding:20px 0; }
+    .pat-error { color:var(--red); font-size:13px; margin-bottom:12px; }
+    .pat-loading { color:var(--muted); font-size:13px; }
 
-    .pat-auth-gate {
-      display: flex; gap: 10px; align-items: center;
-      background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: 8px; padding: 14px 16px; margin-bottom: 24px;
-    }
-    .pat-auth-gate input {
-      flex: 1; background: none; border: none; outline: none;
-      font-family: var(--mono); font-size: 13px; color: var(--text);
-      min-width: 0;
-    }
-    .pat-auth-gate input::placeholder { color: var(--muted); }
-    .pat-auth-gate label { font-size: 12px; color: var(--muted); white-space: nowrap; }
-    .pat-btn {
-      font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 6px;
-      border: 1px solid var(--border-light); cursor: pointer;
-      background: var(--border); color: var(--text);
-      transition: background .15s, border-color .15s;
-      white-space: nowrap;
-    }
-    .pat-btn:hover { background: var(--border-light); }
-    .pat-btn.primary {
-      background: var(--accent); border-color: var(--accent);
-      color: #fff;
-    }
-    .pat-btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-    .pat-btn.danger { border-color: var(--red-bg); color: var(--red); background: var(--red-bg); }
-    .pat-btn.danger:hover { border-color: var(--red); }
+    .anchor { display:block; position:relative; top:-120px; visibility:hidden; }
+    .t-key  { color:#8ab4f8; } .t-str  { color:#c3e88d; } .t-num  { color:#f78c6c; }
+    .t-bool { color:#89ddff; } .t-null { color:var(--muted); } .t-cmt  { color:var(--muted); font-style:italic; }
+    .t-meth { color:var(--green); font-weight:600; } .t-url  { color:var(--blue); } .t-flag { color:#c9a96e; }
 
-    .pat-create-row {
-      display: flex; gap: 10px; align-items: center; margin-bottom: 24px;
-    }
-    .pat-create-row input {
-      flex: 1; background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: 6px; padding: 8px 12px; outline: none;
-      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--text);
-    }
-    .pat-create-row input::placeholder { color: var(--muted); }
-    .pat-create-row input:focus { border-color: var(--accent); }
-
-    .pat-list { display: flex; flex-direction: column; gap: 1px; }
-    .pat-item {
-      display: flex; align-items: center; gap: 12px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 12px 16px;
-      margin-bottom: 8px;
-    }
-    .pat-item-name { font-weight: 600; font-size: 13px; flex: 1; min-width: 0; }
-    .pat-item-token {
-      font-family: var(--mono); font-size: 12px; color: var(--muted);
-      flex: 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .pat-item-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
-
-    .pat-new-token {
-      display: flex; gap: 12px; align-items: center;
-      background: var(--green-bg); border: 1px solid rgba(61,214,140,.25);
-      border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;
-    }
-    .pat-new-token .token-val {
-      flex: 1; font-family: var(--mono); font-size: 12.5px; color: var(--green);
-      word-break: break-all;
-    }
-    .pat-new-token .token-warning {
-      font-size: 12px; color: rgba(61,214,140,.7); margin-top: 4px;
-    }
-
-    .pat-empty { color: var(--muted); font-size: 13px; padding: 20px 0; }
-    .pat-error { color: var(--red); font-size: 13px; margin-bottom: 12px; }
-    .pat-loading { color: var(--muted); font-size: 13px; }
-
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .content { margin-left: 0; }
-      .page-header, .endpoint-section, .auth-section { padding-left: 20px; padding-right: 20px; }
-      .errors-section { padding-left: 20px; padding-right: 20px; }
+    @media (max-width:768px) {
+      .sidebar { display:none; }
+      .content { margin-left:0; }
+      .token-banner { padding-left:20px; }
+      .page-header,.endpoint-section,.auth-section,.pat-section,.errors-section { padding-left:20px; padding-right:20px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Top bar -->
 <header class="topbar">
   <a class="topbar-brand" href="index.html">Dziennik<sup>°</sup></a>
   <span class="topbar-sep">/</span>
-  <span class="topbar-badge">API Reference</span>
-  <div class="topbar-right">
+  <span class="topbar-badge">Docs</span>
+  <div class="tab-switcher">
+    <a class="tab-switch-btn active" id="tsb-api" href="#api-overview">REST API</a>
+    <a class="tab-switch-btn" id="tsb-mcp" href="#mcp-overview">MCP</a>
+  </div>
+  <div class="topbar-right" style="padding-left:16px">
     <a class="topbar-back" href="index.html">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      Wróć do aplikacji
+      Wróć
     </a>
   </div>
 </header>
 
+<div class="token-banner">
+  <label>Token</label>
+  <input type="text" id="tb-name" placeholder="Nazwa tokenu (np. Claude, n8n)" />
+  <button class="tb-btn primary" onclick="tbCreate()">+ Generate</button>
+  <div class="tb-new-token" id="tb-reveal">
+    <div><div class="tv" id="tb-val"></div><div class="tw">⚠ Zapisz — nie będzie pokazany ponownie.</div></div>
+    <button class="tb-btn secondary" onclick="tbCopy()">Copy</button>
+    <button class="tb-btn secondary" onclick="tbDismiss()">✕</button>
+  </div>
+  <span class="tb-err" id="tb-err" style="display:none"></span>
+</div>
+
 <div class="layout">
-  <!-- Sidebar -->
   <nav class="sidebar">
+
     <div class="nav-section">
-      <div class="nav-label">Wprowadzenie</div>
-      <a class="nav-item active" href="#overview" onclick="setActive(this)">Przegląd</a>
-      <a class="nav-item" href="#auth" onclick="setActive(this)">Autoryzacja</a>
-      <a class="nav-item" href="#tokens" onclick="setActive(this)">Tokeny dostępu</a>
-      <a class="nav-item" href="#errors" onclick="setActive(this)">Błędy</a>
+      <div class="nav-label nav-label-section">REST API</div>
+      <a class="nav-item active" href="#api-overview">Przegląd</a>
+      <a class="nav-item" href="#api-auth">Autoryzacja</a>
+      <a class="nav-item" href="#api-tokens">Tokeny</a>
+      <a class="nav-item" href="#api-errors">Błędy</a>
+      <div class="nav-sublabel">Endpointy</div>
+      <a class="nav-item" href="#api-create"><span class="method post">POST</span> Create</a>
+      <a class="nav-item" href="#api-ask"><span class="method post">POST</span> Ask</a>
+      <a class="nav-item" href="#api-read"><span class="method get">GET</span> Read</a>
     </div>
     <div class="nav-section">
-      <div class="nav-label">API</div>
-      <a class="nav-item" href="#create" onclick="setActive(this)">
-        <span class="method post">POST</span> Create
-      </a>
-      <a class="nav-item" href="#ask" onclick="setActive(this)">
-        <span class="method post">POST</span> Ask
-      </a>
-      <a class="nav-item" href="#read" onclick="setActive(this)">
-        <span class="method get">GET</span> Read
-      </a>
+      <div class="nav-label nav-label-section">MCP</div>
+      <a class="nav-item" href="#mcp-overview">Co to MCP?</a>
+      <a class="nav-item" href="#mcp-deploy">Wdrożenie</a>
+      <a class="nav-item" href="#mcp-clients">Klienci</a>
+      <div class="nav-sublabel">Narzędzia</div>
+      <a class="nav-item" href="#mcp-add-training"><span class="method tool">tool</span> add_training</a>
+      <a class="nav-item" href="#mcp-get-trainings"><span class="method tool">tool</span> get_trainings</a>
+      <a class="nav-item" href="#mcp-ask-agent"><span class="method tool">tool</span> ask_agent</a>
     </div>
   </nav>
 
-  <!-- Content -->
   <main class="content">
 
-    <!-- Overview -->
-    <span class="anchor" id="overview"></span>
-    <div class="page-header">
-      <h1>API Reference</h1>
-      <p>REST API do zarządzania dziennikiem treningów. Trzy endpointy pozwalają dodawać wpisy, odpytywać agenta AI i pobierać treningi z danego dnia.</p>
-    </div>
-
-    <!-- Auth -->
-    <span class="anchor" id="auth"></span>
-    <div class="auth-section">
-      <h2>Autoryzacja</h2>
-      <p style="color:var(--muted);margin-bottom:14px;font-size:13px;">Każde żądanie musi zawierać nagłówek <code style="font-family:var(--mono);color:#c9a96e;background:rgba(201,169,110,.08);padding:1px 6px;border-radius:4px">Authorization</code> z tokenem Bearer.</p>
-      <div class="auth-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-        <span>Token API znajdziesz w ustawieniach projektu Supabase → Edge Function Secrets → <strong>API_SECRET_KEY</strong>. Nie udostępniaj go publicznie.</span>
+    <!-- ══ REST API ══ -->
+    <div id="panel-api">
+      <span class="anchor" id="api-overview"></span>
+      <div class="page-header">
+        <h1>REST API</h1>
+        <p>Trzy endpointy do zarządzania dziennikiem treningów. Każde żądanie wymaga nagłówka <code style="font-family:var(--mono);color:#c9a96e;font-size:12px">Authorization: Bearer &lt;TOKEN&gt;</code>.</p>
       </div>
 
-      <div class="code-block-wrap" style="margin-top:16px;">
-        <div class="code-tabs">
-          <button class="code-tab active">Nagłówek</button>
+      <span class="anchor" id="api-auth"></span>
+      <div class="auth-section">
+        <h2>Autoryzacja</h2>
+        <p style="color:var(--muted);margin-bottom:14px;font-size:13px;">Każde żądanie musi zawierać nagłówek <code style="font-family:var(--mono);color:#c9a96e;background:rgba(201,169,110,.08);padding:1px 6px;border-radius:4px">Authorization</code> z tokenem Bearer.</p>
+        <div class="auth-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <span>Token generujesz w pasku powyżej — widoczny tylko raz. Zapisz go zanim zamkniesz stronę.</span>
         </div>
-        <pre><code><span class="t-key">Authorization</span>: <span class="t-str">Bearer &lt;API_SECRET_KEY&gt;</span>
+        <div class="code-block-wrap" style="margin-top:16px;">
+          <div class="code-tabs"><button class="code-tab active">Nagłówek</button></div>
+          <pre><code><span class="t-key">Authorization</span>: <span class="t-str">Bearer &lt;TOKEN&gt;</span>
 <span class="t-key">Content-Type</span>: <span class="t-str">application/json</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-      </div>
-    </div>
-
-    <!-- ═══════════════ CREATE ═══════════════ -->
-    <span class="anchor" id="create"></span>
-    <div class="endpoint-section">
-      <div class="endpoint-header">
-        <span class="method-badge post">POST</span>
-        <h2>Create</h2>
-      </div>
-      <p class="endpoint-desc">Dodaje nowy wpis treningowy do bazy. Jeźdźca wyszukuje po imieniu (częściowe dopasowanie). Zwraca błąd, gdy imię jest niejednoznaczne — wtedy podaj dokładniejsze.</p>
-
-      <div class="url-box">
-        <span class="method-label post">POST</span>
-        <code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</code>
-      </div>
-
-      <div class="section-label">Body parameters</div>
-      <table>
-        <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><code>jezdziec</code><span class="req-badge">required</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Imię jeźdźca (lub fragment). Dopasowanie case-insensitive.</span></td>
-          </tr>
-          <tr>
-            <td><code>kon</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Imię konia. Jeśli nie podano — pole zostaje puste.</span></td>
-          </tr>
-          <tr>
-            <td><code>data</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Data treningu w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiaj.</span></td>
-          </tr>
-          <tr>
-            <td><code>typ_jazdy</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Jeden z: <code style="font-family:var(--mono);font-size:11px">plac</code>, <code style="font-family:var(--mono);font-size:11px">teren</code>, <code style="font-family:var(--mono);font-size:11px">skoki</code>, <code style="font-family:var(--mono);font-size:11px">ujeżdżenie</code>, <code style="font-family:var(--mono);font-size:11px">lonża</code>, <code style="font-family:var(--mono);font-size:11px">inne</code>. Domyślnie <code style="font-family:var(--mono);font-size:11px">plac</code>.</span></td>
-          </tr>
-          <tr>
-            <td><code>ocena</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">number</span></td>
-            <td><span class="desc">Ocena treningu od 1 do 5.</span></td>
-          </tr>
-          <tr>
-            <td><code>cwiczenia</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string[]</span></td>
-            <td><span class="desc">Lista ćwiczeń wykonanych podczas treningu.</span></td>
-          </tr>
-          <tr>
-            <td><code>uwagi</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Ogólne uwagi z treningu.</span></td>
-          </tr>
-          <tr>
-            <td><code>dobrze</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Co poszło dobrze.</span></td>
-          </tr>
-          <tr>
-            <td><code>do_poprawy</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Co wymaga poprawy.</span></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="section-label">Przykładowe żądanie</div>
-      <div class="code-block-wrap">
-        <div class="code-tabs">
-          <button class="code-tab active" onclick="switchTab(this, 'create-curl')">cURL</button>
-          <button class="code-tab" onclick="switchTab(this, 'create-js')">JavaScript</button>
-          <button class="code-tab" onclick="switchTab(this, 'create-py')">Python</button>
-        </div>
-        <pre id="create-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;API_SECRET_KEY&gt;"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{
-    "jezdziec": "Kasia",
-    "kon": "Bryza",
-    "ocena": 4,
-    "typ_jazdy": "plac",
-    "cwiczenia": ["Koła 20 m", "Kłus bez strzemion"],
-    "dobrze": "Dobry rytm w kłusie",
-    "do_poprawy": "Praca łydką w zakrętach"
-  }'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-        <pre id="create-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>, {
-  method: <span class="t-str">"POST"</span>,
-  headers: {
-    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${API_SECRET_KEY}`</span>,
-    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
-  },
-  body: JSON.stringify({
-    jezdziec: <span class="t-str">"Kasia"</span>,
-    kon: <span class="t-str">"Bryza"</span>,
-    ocena: <span class="t-num">4</span>,
-    typ_jazdy: <span class="t-str">"plac"</span>,
-    cwiczenia: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
-    dobrze: <span class="t-str">"Dobry rytm w kłusie"</span>,
-    do_poprawy: <span class="t-str">"Praca łydką w zakrętach"</span>,
-  }),
-});
-<span class="t-key">const</span> data = <span class="t-key">await</span> res.json();
-console.log(data);</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-        <pre id="create-py" style="display:none"><code><span class="t-key">import</span> requests
-
-res = requests.post(
-    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>,
-    headers={
-        <span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {API_SECRET_KEY}"</span>,
-        <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
-    },
-    json={
-        <span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
-        <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>,
-        <span class="t-str">"ocena"</span>: <span class="t-num">4</span>,
-        <span class="t-str">"typ_jazdy"</span>: <span class="t-str">"plac"</span>,
-        <span class="t-str">"cwiczenia"</span>: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
-        <span class="t-str">"dobrze"</span>: <span class="t-str">"Dobry rytm w kłusie"</span>,
-        <span class="t-str">"do_poprawy"</span>: <span class="t-str">"Praca łydką w zakrętach"</span>,
-    },
-)
-print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-      </div>
-
-      <div class="section-label">Odpowiedź</div>
-      <div class="response-wrap">
-        <div class="response-tabs">
-          <button class="response-tab ok active" onclick="switchResponse(this, 'create-ok')">200 OK</button>
-          <button class="response-tab err" onclick="switchResponse(this, 'create-err')">400 / 404</button>
-        </div>
-        <div class="response-body active" id="create-ok">
-          <pre><code>{
-  <span class="t-key">"id"</span>:       <span class="t-str">"3be52fa6-2fcd-4e81-8820-90aa7d890831"</span>,
-  <span class="t-key">"data"</span>:     <span class="t-str">"2026-06-15"</span>,
-  <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
-  <span class="t-key">"ocena"</span>:    <span class="t-num">4</span>
-}</code></pre>
-        </div>
-        <div class="response-body" id="create-err">
-          <pre><code><span class="t-cmt">// Jeźdźca nie znaleziono</span>
-{ <span class="t-key">"error"</span>: <span class="t-str">"Nie znaleziono jeźdźca: \"Kasia\"."</span> }
-
-<span class="t-cmt">// Niejednoznaczne imię</span>
-{
-  <span class="t-key">"error"</span>:      <span class="t-str">"Niejednoznaczne imię: \"Ka\". Podaj dokładniejsze imię."</span>,
-  <span class="t-key">"kandydaci"</span>: [<span class="t-str">"Kasia"</span>, <span class="t-str">"Kamila"</span>, <span class="t-str">"Karolina"</span>]
-}
-
-<span class="t-cmt">// Nieprawidłowa ocena</span>
-{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'ocena' musi być liczbą całkowitą od 1 do 5."</span> }</code></pre>
         </div>
       </div>
-    </div>
 
-    <!-- ═══════════════ ASK ═══════════════ -->
-    <span class="anchor" id="ask"></span>
-    <div class="endpoint-section">
-      <div class="endpoint-header">
-        <span class="method-badge post">POST</span>
-        <h2>Ask</h2>
-      </div>
-      <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek. Endpoint automatycznie pobiera kontekst dnia z bazy — nie musisz podawać danych treningów w żądaniu. Agent ma dostęp do pełnej historii i może wyszukiwać dane z innych dni.</p>
-
-      <div class="url-box">
-        <span class="method-label post">POST</span>
-        <code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</code>
-      </div>
-
-      <div class="section-label">Body parameters</div>
-      <table>
-        <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><code>pytanie</code><span class="req-badge">required</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Pytanie do agenta w dowolnym języku naturalnym.</span></td>
-          </tr>
-          <tr>
-            <td><code>data</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Dzień kontekstu w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Treningi z tego dnia trafiają do promptu systemowego. Domyślnie dzisiaj.</span></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="section-label">Przykładowe żądanie</div>
-      <div class="code-block-wrap">
-        <div class="code-tabs">
-          <button class="code-tab active" onclick="switchTab(this, 'ask-curl')">cURL</button>
-          <button class="code-tab" onclick="switchTab(this, 'ask-js')">JavaScript</button>
-          <button class="code-tab" onclick="switchTab(this, 'ask-py')">Python</button>
-        </div>
-        <pre id="ask-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;API_SECRET_KEY&gt;"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{
-    "pytanie": "Jak postępuje Kasia w ostatnim miesiącu?",
-    "data": "2026-06-15"
-  }'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-        <pre id="ask-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj"</span>, {
-  method: <span class="t-str">"POST"</span>,
-  headers: {
-    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${API_SECRET_KEY}`</span>,
-    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
-  },
-  body: JSON.stringify({
-    pytanie: <span class="t-str">"Jak postępuje Kasia w ostatnim miesiącu?"</span>,
-    data: <span class="t-str">"2026-06-15"</span>,
-  }),
-});
-<span class="t-key">const</span> { odpowiedz } = <span class="t-key">await</span> res.json();
-console.log(odpowiedz);</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-        <pre id="ask-py" style="display:none"><code>res = requests.post(
-    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj"</span>,
-    headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {API_SECRET_KEY}"</span>},
-    json={
-        <span class="t-str">"pytanie"</span>: <span class="t-str">"Jak postępuje Kasia w ostatnim miesiącu?"</span>,
-        <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>,
-    },
-)
-print(res.json()[<span class="t-str">"odpowiedz"</span>])</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-      </div>
-
-      <div class="section-label">Odpowiedź</div>
-      <div class="response-wrap">
-        <div class="response-tabs">
-          <button class="response-tab ok active" onclick="switchResponse(this, 'ask-ok')">200 OK</button>
-          <button class="response-tab err" onclick="switchResponse(this, 'ask-err')">400</button>
-        </div>
-        <div class="response-body active" id="ask-ok">
-          <pre><code>{
-  <span class="t-key">"odpowiedz"</span>: <span class="t-str">"Kasia w ostatnim miesiącu miała 6 treningów — oceny wahają się od 3 do 5. Widać wyraźny postęp w galopie, anglezowanie zdecydowanie pewniejsze. Warto teraz skupić się na pracy bez strzemion dla lepszej równowagi. 💪"</span>
-}</code></pre>
-        </div>
-        <div class="response-body" id="ask-err">
-          <pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'pytanie' jest wymagane."</span> }</code></pre>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════ READ ═══════════════ -->
-    <span class="anchor" id="read"></span>
-    <div class="endpoint-section">
-      <div class="endpoint-header">
-        <span class="method-badge get">GET</span>
-        <h2>Read</h2>
-      </div>
-      <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia. Imiona jeźdźców i koni są już zdekodowane — bez surowych UUID. Jeśli nie podasz daty, zwraca treningi z dzisiaj.</p>
-
-      <div class="url-box">
-        <span class="method-label get">GET</span>
-        <code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15</code>
-      </div>
-
-      <div class="section-label">Query parameters</div>
-      <table>
-        <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><code>data</code><span class="opt-badge">optional</span></td>
-            <td><span class="type-badge">string</span></td>
-            <td><span class="desc">Data w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiaj.</span></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="section-label">Przykładowe żądanie</div>
-      <div class="code-block-wrap">
-        <div class="code-tabs">
-          <button class="code-tab active" onclick="switchTab(this, 'read-curl')">cURL</button>
-          <button class="code-tab" onclick="switchTab(this, 'read-js')">JavaScript</button>
-          <button class="code-tab" onclick="switchTab(this, 'read-py')">Python</button>
-        </div>
-        <pre id="read-curl"><code><span class="t-meth">curl</span> <span class="t-url">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span> \
-  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;API_SECRET_KEY&gt;"</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-        <pre id="read-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(
-  <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span>,
-  { headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${API_SECRET_KEY}`</span> } }
-);
-<span class="t-key">const</span> { treningi } = <span class="t-key">await</span> res.json();
-console.log(treningi);</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-        <pre id="read-py" style="display:none"><code>res = requests.get(
-    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia"</span>,
-    headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {API_SECRET_KEY}"</span>},
-    params={<span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>},
-)
-print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-      </div>
-
-      <div class="section-label">Odpowiedź</div>
-      <div class="response-wrap">
-        <div class="response-tabs">
-          <button class="response-tab ok active" onclick="switchResponse(this, 'read-ok')">200 OK</button>
-          <button class="response-tab err" onclick="switchResponse(this, 'read-err')">400</button>
-        </div>
-        <div class="response-body active" id="read-ok">
-          <pre><code>{
-  <span class="t-key">"data"</span>:    <span class="t-str">"2026-06-15"</span>,
-  <span class="t-key">"liczba"</span>:  <span class="t-num">2</span>,
-  <span class="t-key">"treningi"</span>: [
-    {
-      <span class="t-key">"id"</span>:         <span class="t-str">"3be52fa6-2fcd-4e81-8820-90aa7d890831"</span>,
-      <span class="t-key">"data"</span>:       <span class="t-str">"2026-06-15"</span>,
-      <span class="t-key">"jezdziec"</span>:   <span class="t-str">"Kasia"</span>,
-      <span class="t-key">"kon"</span>:        <span class="t-str">"Bryza"</span>,
-      <span class="t-key">"typ_jazdy"</span>:  <span class="t-str">"plac"</span>,
-      <span class="t-key">"grupowa"</span>:    <span class="t-bool">false</span>,
-      <span class="t-key">"cwiczenia"</span>:  [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
-      <span class="t-key">"uwagi"</span>:      <span class="t-null">null</span>,
-      <span class="t-key">"dobrze"</span>:     <span class="t-str">"Dobry rytm w kłusie"</span>,
-      <span class="t-key">"do_poprawy"</span>: <span class="t-str">"Praca łydką w zakrętach"</span>,
-      <span class="t-key">"ocena"</span>:      <span class="t-num">4</span>
-    }
-  ]
-}</code></pre>
-        </div>
-        <div class="response-body" id="read-err">
-          <pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Nieprawidłowy format daty. Użyj YYYY-MM-DD."</span> }</code></pre>
-        </div>
-      </div>
-    </div>
-
-    <!-- Personal Access Tokens -->
-    <span class="anchor" id="tokens"></span>
-    <div class="pat-section">
-      <h2>Personal Access Tokens</h2>
-      <p class="pat-desc">Wygeneruj token, by uzyskać dostęp do API. Token jest pokazywany tylko raz — po wygenerowaniu zapisz go.</p>
-
-      <!-- Publiczny formularz generowania -->
-      <div class="pat-create-row">
-        <input type="text" id="pat-name-input" placeholder="Nazwa tokenu (np. n8n, Make, Claude)" />
-        <button class="pat-btn primary" onclick="patCreate()">+ Generate token</button>
-      </div>
-
-      <div id="pat-new-reveal" style="display:none" class="pat-new-token">
-        <div>
-          <div class="token-val" id="pat-new-val"></div>
-          <div class="token-warning">⚠ Zapisz ten token — nie będzie pokazany ponownie.</div>
-        </div>
-        <button class="pat-btn" onclick="patCopyNew()">Copy</button>
-      </div>
-
-      <div id="pat-error" class="pat-error" style="display:none"></div>
-
-      <!-- Panel admina (lista + revoke) — tylko master key -->
-      <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--border);">
-        <div class="section-label">Zarządzanie tokenami (admin)</div>
-        <div class="pat-auth-gate" id="pat-gate" style="margin-top:10px;">
-          <label>Master key</label>
-          <input type="password" id="pat-master-input" placeholder="Wklej API_SECRET_KEY…" />
-          <button class="pat-btn" onclick="patAuth()">Zaloguj</button>
-        </div>
-        <div id="pat-manager" style="display:none">
-          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-            <button class="pat-btn" onclick="patLogout()" style="font-size:11px;color:var(--muted);">Wyloguj</button>
+      <span class="anchor" id="api-create"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><span class="method-badge post">POST</span><h2>Create</h2></div>
+        <p class="endpoint-desc">Dodaje nowy wpis treningowy. Jeźdźca wyszukuje po imieniu (częściowe dopasowanie). Zwraca błąd gdy imię niejednoznaczne.</p>
+        <div class="url-box"><span class="method-label post">POST</span><code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</code></div>
+        <div class="section-label">Body parameters</div>
+        <table>
+          <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+          <tbody>
+            <tr><td><code>jezdziec</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię jeźdźca (lub fragment).</span></td></tr>
+            <tr><td><code>kon</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię konia.</span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
+            <tr><td><code>typ_jazdy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">plac · teren · skoki · ujeżdżenie · lonża · inne</span></td></tr>
+            <tr><td><code>ocena</code><span class="opt-badge">optional</span></td><td><span class="type-badge">number</span></td><td><span class="desc">Ocena 1–5.</span></td></tr>
+            <tr><td><code>cwiczenia</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string[]</span></td><td><span class="desc">Lista ćwiczeń.</span></td></tr>
+            <tr><td><code>uwagi</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Ogólne uwagi z treningu.</span></td></tr>
+            <tr><td><code>dobrze</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co poszło dobrze.</span></td></tr>
+            <tr><td><code>do_poprawy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co wymaga poprawy.</span></td></tr>
+          </tbody>
+        </table>
+        <div class="section-label">Przykładowe żądanie</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchCodeTab(this,'c-create-curl')">cURL</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'c-create-js')">JavaScript</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'c-create-py')">Python</button>
           </div>
-          <div id="pat-loading" class="pat-loading" style="display:none">Ładowanie…</div>
-          <div id="pat-list" class="pat-list"></div>
+          <pre id="c-create-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;TOKEN&gt;"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{"jezdziec":"Kasia","kon":"Bryza","ocena":4,"cwiczenia":["Koła 20m"]}'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="c-create-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>, {
+  method: <span class="t-str">"POST"</span>,
+  headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>, <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span> },
+  body: JSON.stringify({ jezdziec: <span class="t-str">"Kasia"</span>, kon: <span class="t-str">"Bryza"</span>, ocena: <span class="t-num">4</span> }),
+});</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="c-create-py" style="display:none"><code>res = requests.post(
+    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>,
+    headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {TOKEN}"</span>},
+    json={<span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>, <span class="t-str">"ocena"</span>: <span class="t-num">4</span>},
+)</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
         </div>
+        <div class="section-label">Odpowiedź</div>
+        <div class="response-wrap">
+          <div class="response-tabs">
+            <button class="response-tab ok active" onclick="switchResponse(this,'cr-ok')">200 OK</button>
+            <button class="response-tab err" onclick="switchResponse(this,'cr-err')">400 / 404</button>
+          </div>
+          <div class="response-body active" id="cr-ok"><pre><code>{ <span class="t-key">"id"</span>: <span class="t-str">"3be52fa6-..."</span>, <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>, <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-key">"ocena"</span>: <span class="t-num">4</span> }</code></pre></div>
+          <div class="response-body" id="cr-err"><pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Nie znaleziono jeźdźca: \"Kasia\"."</span> }
+{ <span class="t-key">"error"</span>: <span class="t-str">"Niejednoznaczne imię."</span>, <span class="t-key">"kandydaci"</span>: [<span class="t-str">"Kasia"</span>, <span class="t-str">"Kamila"</span>] }</code></pre></div>
+        </div>
+      </div>
+
+      <span class="anchor" id="api-ask"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><span class="method-badge post">POST</span><h2>Ask</h2></div>
+        <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek. Agent automatycznie pobiera kontekst z bazy.</p>
+        <div class="url-box"><span class="method-label post">POST</span><code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</code></div>
+        <div class="section-label">Body parameters</div>
+        <table>
+          <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+          <tbody>
+            <tr><td><code>pytanie</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Pytanie w języku naturalnym.</span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Dzień kontekstu YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
+          </tbody>
+        </table>
+        <div class="section-label">Przykładowe żądanie</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchCodeTab(this,'c-ask-curl')">cURL</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'c-ask-js')">JavaScript</button>
+          </div>
+          <pre id="c-ask-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;TOKEN&gt;"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{"pytanie":"Jak postępuje Kasia?","data":"2026-06-15"}'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="c-ask-js" style="display:none"><code><span class="t-key">const</span> { odpowiedz } = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj"</span>, {
+  method: <span class="t-str">"POST"</span>,
+  headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>, <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span> },
+  body: JSON.stringify({ pytanie: <span class="t-str">"Jak postępuje Kasia?"</span> }),
+}).then(r => r.json());</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+        <div class="section-label">Odpowiedź</div>
+        <div class="response-wrap">
+          <div class="response-tabs">
+            <button class="response-tab ok active" onclick="switchResponse(this,'ar-ok')">200 OK</button>
+            <button class="response-tab err" onclick="switchResponse(this,'ar-err')">400</button>
+          </div>
+          <div class="response-body active" id="ar-ok"><pre><code>{ <span class="t-key">"odpowiedz"</span>: <span class="t-str">"Kasia ma 6 treningów w ostatnim miesiącu. Widać postęp w galopie — oceny wzrosły z 3 do 5. 💪"</span> }</code></pre></div>
+          <div class="response-body" id="ar-err"><pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'pytanie' jest wymagane."</span> }</code></pre></div>
+        </div>
+      </div>
+
+      <span class="anchor" id="api-read"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><span class="method-badge get">GET</span><h2>Read</h2></div>
+        <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia. Imiona zdekodowane — bez UUID.</p>
+        <div class="url-box"><span class="method-label get">GET</span><code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15</code></div>
+        <div class="section-label">Query parameters</div>
+        <table>
+          <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+          <tbody><tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr></tbody>
+        </table>
+        <div class="section-label">Przykładowe żądanie</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchCodeTab(this,'c-read-curl')">cURL</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'c-read-js')">JavaScript</button>
+          </div>
+          <pre id="c-read-curl"><code><span class="t-meth">curl</span> <span class="t-url">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;TOKEN&gt;"</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="c-read-js" style="display:none"><code><span class="t-key">const</span> { treningi } = <span class="t-key">await</span> fetch(
+  <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span>,
+  { headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span> } }
+).then(r => r.json());</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+        <div class="section-label">Odpowiedź</div>
+        <div class="response-wrap">
+          <div class="response-tabs">
+            <button class="response-tab ok active" onclick="switchResponse(this,'rr-ok')">200 OK</button>
+            <button class="response-tab err" onclick="switchResponse(this,'rr-err')">400</button>
+          </div>
+          <div class="response-body active" id="rr-ok"><pre><code>{
+  <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>, <span class="t-key">"liczba"</span>: <span class="t-num">1</span>,
+  <span class="t-key">"treningi"</span>: [{
+    <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-key">"kon"</span>: <span class="t-str">"Bryza"</span>, <span class="t-key">"typ_jazdy"</span>: <span class="t-str">"plac"</span>, <span class="t-key">"ocena"</span>: <span class="t-num">4</span>
+  }]
+}</code></pre></div>
+          <div class="response-body" id="rr-err"><pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Nieprawidłowy format daty. Użyj YYYY-MM-DD."</span> }</code></pre></div>
+        </div>
+      </div>
+
+      <span class="anchor" id="api-tokens"></span>
+      <div class="pat-section">
+        <h2>Personal Access Tokens</h2>
+        <p class="pat-desc">Generuj tokeny w pasku u góry. Poniżej panel admina do ich przeglądania i revokowania.</p>
+        <div style="padding-top:8px;border-top:1px solid var(--border);">
+          <div class="section-label" style="margin-top:16px;">Zarządzanie tokenami (admin)</div>
+          <div class="pat-auth-gate" id="pat-gate">
+            <label>Master key</label>
+            <input type="password" id="pat-master-input" placeholder="Wklej API_SECRET_KEY…" />
+            <button class="pat-btn" onclick="patAuth()">Zaloguj</button>
+          </div>
+          <div id="pat-manager" style="display:none">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+              <button class="pat-btn" onclick="patLogout()" style="font-size:11px;color:var(--muted);">Wyloguj</button>
+            </div>
+            <div id="pat-loading" class="pat-loading" style="display:none">Ładowanie…</div>
+            <div id="pat-list" class="pat-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <span class="anchor" id="api-errors"></span>
+      <div class="errors-section">
+        <h2>Kody błędów</h2>
+        <table>
+          <thead><tr><th>Kod</th><th>Znaczenie</th></tr></thead>
+          <tbody>
+            <tr><td><code>401</code></td><td><span class="desc">Brak lub nieprawidłowy token.</span></td></tr>
+            <tr><td><code>400</code></td><td><span class="desc">Błąd walidacji — brakujące pole lub niejednoznaczne imię.</span></td></tr>
+            <tr><td><code>404</code></td><td><span class="desc">Nie znaleziono jeźdźca lub konia.</span></td></tr>
+            <tr><td><code>405</code></td><td><span class="desc">Niedozwolona metoda HTTP.</span></td></tr>
+            <tr><td><code>500</code></td><td><span class="desc">Błąd serwera.</span></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Errors -->
-    <span class="anchor" id="errors"></span>
-    <div class="errors-section">
-      <h2>Kody błędów</h2>
-      <table>
-        <thead><tr><th>Kod</th><th>Znaczenie</th></tr></thead>
-        <tbody>
-          <tr><td><code>401</code></td><td><span class="desc">Brak lub nieprawidłowy token Bearer.</span></td></tr>
-          <tr><td><code>400</code></td><td><span class="desc">Błąd walidacji — brakujące pole, niejednoznaczne imię lub nieprawidłowy format.</span></td></tr>
-          <tr><td><code>404</code></td><td><span class="desc">Nie znaleziono jeźdźca lub konia o podanej nazwie.</span></td></tr>
-          <tr><td><code>405</code></td><td><span class="desc">Niedozwolona metoda HTTP.</span></td></tr>
-          <tr><td><code>500</code></td><td><span class="desc">Błąd serwera — problem z bazą danych lub API modelu AI.</span></td></tr>
-        </tbody>
-      </table>
+    <!-- ══ MCP ══ -->
+    <div id="panel-mcp">
+      <span class="anchor" id="mcp-overview"></span>
+      <div class="page-header">
+        <h1>MCP Server</h1>
+        <p>Model Context Protocol — standardowy interfejs, dzięki któremu agenci AI (Claude, Cursor, n8n…) korzystają z dziennika bezpośrednio, bez pisania kodu HTTP.</p>
+      </div>
+
+      <div class="endpoint-section">
+        <div class="callout purple">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>MCP server to cienka warstwa proxy między klientem AI a istniejącymi edge functions. Używa tego samego tokenu co REST API.</span>
+        </div>
+        <div class="section-label">Jak to działa</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>Klient AI wywołuje tool</h4><p>np. Claude Desktop prosi o <code style="font-family:var(--mono);color:var(--purple);font-size:12px">add_training</code> z parametrami.</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>MCP server (Vercel) tłumaczy żądanie</h4><p>Waliduje token, mapuje parametry i wywołuje odpowiedni Supabase edge function.</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Odpowiedź wraca do agenta</h4><p>JSON z bazy trafia z powrotem do klienta AI jako wynik tool call.</p></div></div>
+        </div>
+        <div class="section-label">URL serwera MCP</div>
+        <pre class="solo"><code><span class="t-url">https://mcp-server-phi-seven.vercel.app/mcp</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
+
+      <span class="anchor" id="mcp-deploy"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><h2>Wdrożenie na Vercel</h2></div>
+        <p class="endpoint-desc">Serwer jest już wdrożony. Pliki źródłowe w <code style="font-family:var(--mono);font-size:12px">deploy/mcp-server/</code> — by ponownie wdrożyć po zmianach:</p>
+        <div class="code-block-wrap">
+          <div class="code-tabs"><button class="code-tab active">Terminal</button></div>
+          <pre><code><span class="t-meth">cd</span> deploy/mcp-server
+<span class="t-meth">npx</span> vercel deploy --prod</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+        <div class="callout tip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 14v-4m0-4h.01"/></svg>
+          <span>Vercel automatycznie wykrywa TypeScript. Routing <code style="font-family:var(--mono);font-size:11px">/mcp → api/mcp.ts</code> skonfigurowany w <code style="font-family:var(--mono);font-size:11px">vercel.json</code>.</span>
+        </div>
+      </div>
+
+      <span class="anchor" id="mcp-clients"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><h2>Konfiguracja klientów</h2></div>
+        <p class="endpoint-desc">MCP server działa z każdym klientem obsługującym Streamable HTTP.</p>
+
+        <div class="section-label">Claude Desktop</div>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">Edytuj <code style="font-family:var(--mono);font-size:12px">claude_desktop_config.json</code> (macOS: <code style="font-family:var(--mono);font-size:12px">~/Library/Application Support/Claude/</code>, Windows: <code style="font-family:var(--mono);font-size:12px">%APPDATA%\Claude\</code>).</p>
+        <div class="code-block-wrap">
+          <div class="code-tabs"><button class="code-tab active">claude_desktop_config.json</button></div>
+          <pre><code>{
+  <span class="t-key">"mcpServers"</span>: {
+    <span class="t-key">"dziennik"</span>: {
+      <span class="t-key">"command"</span>: <span class="t-str">"npx"</span>,
+      <span class="t-key">"args"</span>: [
+        <span class="t-str">"-y"</span>, <span class="t-str">"mcp-remote"</span>,
+        <span class="t-str">"https://mcp-server-phi-seven.vercel.app/mcp"</span>,
+        <span class="t-str">"--header"</span>,
+        <span class="t-str">"Authorization: Bearer &lt;TOKEN&gt;"</span>
+      ]
+    }
+  }
+}</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+
+        <div class="section-label">Cursor</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs"><button class="code-tab active">.cursor/mcp.json</button></div>
+          <pre><code>{
+  <span class="t-key">"mcpServers"</span>: {
+    <span class="t-key">"dziennik"</span>: {
+      <span class="t-key">"url"</span>: <span class="t-str">"https://mcp-server-phi-seven.vercel.app/mcp"</span>,
+      <span class="t-key">"headers"</span>: { <span class="t-key">"Authorization"</span>: <span class="t-str">"Bearer &lt;TOKEN&gt;"</span> }
+    }
+  }
+}</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+
+        <div class="section-label">Python SDK</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs"><button class="code-tab active">Python</button></div>
+          <pre><code><span class="t-key">from</span> mcp <span class="t-key">import</span> ClientSession
+<span class="t-key">from</span> mcp.client.streamable_http <span class="t-key">import</span> streamablehttp_client
+
+TOKEN = <span class="t-str">"dziennik_..."</span>
+URL   = <span class="t-str">"https://mcp-server-phi-seven.vercel.app/mcp"</span>
+
+<span class="t-key">async with</span> streamablehttp_client(URL, headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {TOKEN}"</span>}) <span class="t-key">as</span> (r, w, _):
+    <span class="t-key">async with</span> ClientSession(r, w) <span class="t-key">as</span> session:
+        <span class="t-key">await</span> session.initialize()
+        tools = <span class="t-key">await</span> session.list_tools()
+        <span class="t-cmt"># ['add_training', 'get_trainings', 'ask_agent']</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+      </div>
+
+      <span class="anchor" id="mcp-add-training"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><span class="method-badge tool">tool</span><h2>add_training</h2></div>
+        <p class="endpoint-desc">Dodaje nowy wpis treningowy. Odpowiada REST <code style="font-family:var(--mono);font-size:12px">POST /nowy-trening</code>.</p>
+        <div class="url-box"><span class="method-label tool">tool</span><code>add_training</code></div>
+        <div class="section-label">Parametry</div>
+        <table>
+          <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+          <tbody>
+            <tr><td><code>jezdziec</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię jeźdźca (lub fragment).</span></td></tr>
+            <tr><td><code>kon</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię konia.</span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
+            <tr><td><code>typ_jazdy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">enum</span></td><td><span class="desc">plac · teren · skoki · ujeżdżenie · lonża · inne</span></td></tr>
+            <tr><td><code>ocena</code><span class="opt-badge">optional</span></td><td><span class="type-badge">number</span></td><td><span class="desc">Ocena 1–5.</span></td></tr>
+            <tr><td><code>cwiczenia</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string[]</span></td><td><span class="desc">Lista ćwiczeń.</span></td></tr>
+            <tr><td><code>uwagi</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Ogólne uwagi.</span></td></tr>
+            <tr><td><code>dobrze</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co poszło dobrze.</span></td></tr>
+            <tr><td><code>do_poprawy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co wymaga poprawy.</span></td></tr>
+            <tr><td><code>grupowa</code><span class="opt-badge">optional</span></td><td><span class="type-badge">boolean</span></td><td><span class="desc">Trening grupowy. Domyślnie false.</span></td></tr>
+          </tbody>
+        </table>
+        <div class="section-label">Przykład</div>
+        <pre class="solo"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"add_training"</span>, {
+    <span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>, <span class="t-str">"ocena"</span>: <span class="t-num">4</span>,
+    <span class="t-str">"cwiczenia"</span>: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
+})</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
+
+      <span class="anchor" id="mcp-get-trainings"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><span class="method-badge tool">tool</span><h2>get_trainings</h2></div>
+        <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia. Odpowiada REST <code style="font-family:var(--mono);font-size:12px">GET /trening-dnia</code>.</p>
+        <div class="url-box"><span class="method-label tool">tool</span><code>get_trainings</code></div>
+        <div class="section-label">Parametry</div>
+        <table>
+          <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+          <tbody><tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr></tbody>
+        </table>
+        <div class="section-label">Przykład</div>
+        <pre class="solo"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"get_trainings"</span>, {<span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>})</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
+
+      <span class="anchor" id="mcp-ask-agent"></span>
+      <div class="endpoint-section">
+        <div class="endpoint-header"><span class="method-badge tool">tool</span><h2>ask_agent</h2></div>
+        <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek. Odpowiada REST <code style="font-family:var(--mono);font-size:12px">POST /zapytaj</code>.</p>
+        <div class="url-box"><span class="method-label tool">tool</span><code>ask_agent</code></div>
+        <div class="section-label">Parametry</div>
+        <table>
+          <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
+          <tbody>
+            <tr><td><code>pytanie</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Pytanie w języku naturalnym.</span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Dzień kontekstu YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
+          </tbody>
+        </table>
+        <div class="callout info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <span>Ten tool wywołuje model AI i może zająć kilka sekund. Vercel ustawiony na <code style="font-family:var(--mono);font-size:11px">maxDuration: 60s</code>.</span>
+        </div>
+        <div class="section-label">Przykład</div>
+        <pre class="solo"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"ask_agent"</span>, {
+    <span class="t-str">"pytanie"</span>: <span class="t-str">"Jakie postępy robi Kasia?"</span>, <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>
+})</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+      </div>
     </div>
 
   </main>
 </div>
 
 <script>
-  function setActive(el) {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-  }
-
-  function switchTab(btn, targetId) {
+  function switchCodeTab(btn, targetId) {
     const wrap = btn.closest('.code-block-wrap');
     wrap.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    wrap.querySelectorAll('pre').forEach(p => p.style.display = 'none');
+    wrap.querySelectorAll('pre[id]').forEach(p => p.style.display = 'none');
     document.getElementById(targetId).style.display = 'block';
   }
-
   function switchResponse(btn, targetId) {
     const wrap = btn.closest('.response-wrap');
     wrap.querySelectorAll('.response-tab').forEach(t => t.classList.remove('active'));
@@ -856,57 +605,74 @@ print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</
     wrap.querySelectorAll('.response-body').forEach(b => b.classList.remove('active'));
     document.getElementById(targetId).classList.add('active');
   }
-
   function copyCode(btn) {
     const pre = btn.closest('pre');
-    const text = pre.innerText.replace('Copy', '').replace('Copied!', '').trim();
+    const text = pre.innerText.replace(/^Copy$|^Copied!$/m,'').trim();
     navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = 'Copied!';
-      btn.classList.add('copied');
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
     });
   }
 
-  // ── PAT management ──
   const PAT_URL = 'https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/manage-tokens';
-  let patMasterKey = localStorage.getItem('pat_master_key') || '';
+  async function tbCreate() {
+    const nameEl = document.getElementById('tb-name');
+    const name = nameEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+    document.getElementById('tb-err').style.display = 'none';
+    document.getElementById('tb-reveal').style.display = 'none';
+    try {
+      const res = await fetch(PAT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name}) });
+      const data = await res.json();
+      if (!res.ok) { showTbErr(data.error||'Błąd'); return; }
+      document.getElementById('tb-val').textContent = data.token;
+      document.getElementById('tb-reveal').style.display = 'flex';
+      nameEl.value = '';
+    } catch(e) { showTbErr('Błąd sieci.'); }
+  }
+  function tbCopy() {
+    navigator.clipboard.writeText(document.getElementById('tb-val').textContent).then(() => {
+      const btn = event.target; btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+  function tbDismiss() { document.getElementById('tb-reveal').style.display='none'; }
+  function showTbErr(msg) {
+    const el = document.getElementById('tb-err');
+    el.textContent = msg; el.style.display = 'inline';
+    setTimeout(() => el.style.display = 'none', 5000);
+  }
+  document.getElementById('tb-name').addEventListener('keydown', e => { if(e.key==='Enter') tbCreate(); });
 
-  function patAuth() {
-    const val = document.getElementById('pat-master-input').value.trim();
-    if (!val) return;
-    patMasterKey = val;
-    localStorage.setItem('pat_master_key', val);
+  let patMasterKey = localStorage.getItem('pat_master_key')||'';
+  if (patMasterKey) {
     document.getElementById('pat-gate').style.display = 'none';
     document.getElementById('pat-manager').style.display = 'block';
     patLoad();
   }
-
-  // Auto-show manager if key already in session
-  if (patMasterKey) {
+  function patAuth() {
+    const val = document.getElementById('pat-master-input').value.trim();
+    if (!val) return;
+    patMasterKey = val; localStorage.setItem('pat_master_key', val);
     document.getElementById('pat-gate').style.display = 'none';
     document.getElementById('pat-manager').style.display = 'block';
+    patLoad();
   }
-
   async function patLoad() {
     const loading = document.getElementById('pat-loading');
     const list = document.getElementById('pat-list');
-    const err = document.getElementById('pat-error');
-    loading.style.display = 'block'; list.innerHTML = ''; err.style.display = 'none';
+    loading.style.display = 'block'; list.innerHTML = '';
     try {
-      const res = await fetch(PAT_URL, { headers: { Authorization: `Bearer ${patMasterKey}` } });
+      const res = await fetch(PAT_URL, { headers:{Authorization:`Bearer ${patMasterKey}`} });
       const data = await res.json();
       loading.style.display = 'none';
-      if (!res.ok) { showPatError(data.error || 'Błąd serwera'); return; }
-      renderPatList(data.tokens || []);
-    } catch(e) { loading.style.display = 'none'; showPatError('Błąd sieci.'); }
+      if (!res.ok) { list.innerHTML=`<p class="pat-error">${escHtml(data.error||'Błąd')}</p>`; return; }
+      renderPatList(data.tokens||[]);
+    } catch { loading.style.display='none'; list.innerHTML='<p class="pat-error">Błąd sieci.</p>'; }
   }
-
   function renderPatList(tokens) {
     const list = document.getElementById('pat-list');
-    if (!tokens.length) {
-      list.innerHTML = '<p class="pat-empty">Brak tokenów. Wygeneruj pierwszy.</p>';
-      return;
-    }
+    if (!tokens.length) { list.innerHTML='<p class="pat-empty">Brak tokenów.</p>'; return; }
     list.innerHTML = tokens.map(t => `
       <div class="pat-item" id="pat-item-${t.id}">
         <span class="pat-item-name">${escHtml(t.name)}</span>
@@ -915,95 +681,41 @@ print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</
         <button class="pat-btn danger" onclick="patRevoke('${t.id}')">Revoke</button>
       </div>`).join('');
   }
-
-  async function patCreate() {
-    const nameInput = document.getElementById('pat-name-input');
-    const name = nameInput.value.trim();
-    if (!name) { nameInput.focus(); return; }
-    const err = document.getElementById('pat-error');
-    err.style.display = 'none';
-    document.getElementById('pat-new-reveal').style.display = 'none';
-    try {
-      const res = await fetch(PAT_URL, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${patMasterKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
-      });
-      const data = await res.json();
-      if (!res.ok) { showPatError(data.error || 'Błąd'); return; }
-      document.getElementById('pat-new-val').textContent = data.token;
-      document.getElementById('pat-new-reveal').style.display = 'flex';
-      nameInput.value = '';
-      patLoad();
-    } catch(e) { showPatError('Błąd sieci.'); }
-  }
-
   async function patRevoke(id) {
-    if (!confirm('Usunąć ten token? Operacja jest nieodwracalna.')) return;
-    try {
-      const res = await fetch(`${PAT_URL}?id=${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${patMasterKey}` },
-      });
-      if (!res.ok) { const d = await res.json(); showPatError(d.error || 'Błąd'); return; }
+    if (!confirm('Usunąć ten token?')) return;
+    const res = await fetch(`${PAT_URL}?id=${id}`, { method:'DELETE', headers:{Authorization:`Bearer ${patMasterKey}`} });
+    if (res.ok) {
       document.getElementById(`pat-item-${id}`)?.remove();
       const list = document.getElementById('pat-list');
-      if (!list.querySelector('.pat-item')) list.innerHTML = '<p class="pat-empty">Brak tokenów.</p>';
-    } catch(e) { showPatError('Błąd sieci.'); }
+      if (!list.querySelector('.pat-item')) list.innerHTML='<p class="pat-empty">Brak tokenów.</p>';
+    }
   }
-
-  function patCopyNew() {
-    const val = document.getElementById('pat-new-val').textContent;
-    navigator.clipboard.writeText(val).then(() => {
-      const btn = event.target; btn.textContent = 'Copied!';
-      setTimeout(() => btn.textContent = 'Copy', 2000);
-    });
-  }
-
   function patLogout() {
-    localStorage.removeItem('pat_master_key');
-    patMasterKey = '';
-    document.getElementById('pat-manager').style.display = 'none';
-    document.getElementById('pat-gate').style.display = 'flex';
-    document.getElementById('pat-master-input').value = '';
+    localStorage.removeItem('pat_master_key'); patMasterKey = '';
+    document.getElementById('pat-manager').style.display='none';
+    document.getElementById('pat-gate').style.display='flex';
+    document.getElementById('pat-master-input').value='';
   }
+  document.getElementById('pat-master-input')?.addEventListener('keydown', e => { if(e.key==='Enter') patAuth(); });
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function showPatError(msg) {
-    const err = document.getElementById('pat-error');
-    err.textContent = msg; err.style.display = 'block';
-  }
-
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  // Enter key in master input
-  document.getElementById('pat-master-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') patAuth();
-  });
-
-  // Auto-load tokens if session already has key
-  if (patMasterKey) patLoad();
-
-  // ── Highlight active nav on scroll ──
-  const sections = ['overview','auth','tokens','create','ask','read','errors'];
+  const allSections = ['api-overview','api-auth','api-create','api-ask','api-read','api-tokens','api-errors',
+    'mcp-overview','mcp-deploy','mcp-clients','mcp-add-training','mcp-get-trainings','mcp-ask-agent'];
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
-        const id = e.target.id;
-        const link = document.querySelector(`.nav-item[href="#${id}"]`);
-        if (link) {
-          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-          link.classList.add('active');
-        }
+        // sidebar nav
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        const link = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+        // topbar tab highlight
+        const isMcp = e.target.id.startsWith('mcp');
+        document.querySelectorAll('.tab-switch-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(isMcp ? 'tsb-mcp' : 'tsb-api').classList.add('active');
       }
     });
-  }, { rootMargin: '-20% 0px -75% 0px' });
-
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
+  }, { rootMargin:'-20% 0px -75% 0px' });
+  allSections.forEach(id => { const el = document.getElementById(id); if(el) observer.observe(el); });
 </script>
 </body>
 </html>
