@@ -261,22 +261,26 @@
 
       <span class="anchor" id="api-create"></span>
       <div class="endpoint-section">
-        <div class="endpoint-header"><span class="method-badge post">POST</span><h2>Create</h2></div>
-        <p class="endpoint-desc">Dodaje nowy wpis treningowy. Jeźdźca wyszukuje po imieniu (częściowe dopasowanie). Zwraca błąd gdy imię niejednoznaczne.</p>
+        <div class="endpoint-header"><span class="method-badge post">POST</span><h2>Create — nowy trening</h2></div>
+        <p class="endpoint-desc">Dodaje nowy wpis treningowy do dziennika. Jeźdźca wyszukuje po imieniu (częściowe dopasowanie, case-insensitive) — wystarczy wpisać kilka liter. Jeśli imię pasuje do więcej niż jednej osoby, endpoint zwraca listę kandydatów zamiast tworzyć wpis.</p>
         <div class="url-box"><span class="method-label post">POST</span><code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</code></div>
+        <div class="callout info" style="margin-bottom:24px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <span>Koń jest opcjonalny — wpis pojawi się w dzienniku bez przypisanego konia. Pole <code style="font-family:var(--mono);font-size:11px">data</code> domyślnie przyjmuje dzisiejszą datę z serwera.</span>
+        </div>
         <div class="section-label">Body parameters</div>
         <table>
           <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
           <tbody>
-            <tr><td><code>jezdziec</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię jeźdźca (lub fragment).</span></td></tr>
-            <tr><td><code>kon</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię konia.</span></td></tr>
-            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
-            <tr><td><code>typ_jazdy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">plac · teren · skoki · ujeżdżenie · lonża · inne</span></td></tr>
-            <tr><td><code>ocena</code><span class="opt-badge">optional</span></td><td><span class="type-badge">number</span></td><td><span class="desc">Ocena 1–5.</span></td></tr>
-            <tr><td><code>cwiczenia</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string[]</span></td><td><span class="desc">Lista ćwiczeń.</span></td></tr>
-            <tr><td><code>uwagi</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Ogólne uwagi z treningu.</span></td></tr>
-            <tr><td><code>dobrze</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co poszło dobrze.</span></td></tr>
-            <tr><td><code>do_poprawy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co wymaga poprawy.</span></td></tr>
+            <tr><td><code>jezdziec</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię jeźdźca lub fragment (np. <code style="font-family:var(--mono);font-size:11px">"Kas"</code> znajdzie Kasię). Szuka case-insensitive po kolumnie <code style="font-family:var(--mono);font-size:11px">imie</code>.</span></td></tr>
+            <tr><td><code>kon</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię konia (też częściowe dopasowanie). Gdy niejednoznaczne, endpoint zwraca błąd z kandydatami.</span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data treningu w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiejsza data.</span></td></tr>
+            <tr><td><code>typ_jazdy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">enum</span></td><td><span class="desc"><code style="font-family:var(--mono);font-size:11px">plac</code> (domyślnie) · <code style="font-family:var(--mono);font-size:11px">teren</code> · <code style="font-family:var(--mono);font-size:11px">skoki</code> · <code style="font-family:var(--mono);font-size:11px">ujeżdżenie</code> · <code style="font-family:var(--mono);font-size:11px">lonża</code> · <code style="font-family:var(--mono);font-size:11px">inne</code></span></td></tr>
+            <tr><td><code>ocena</code><span class="opt-badge">optional</span></td><td><span class="type-badge">integer 1–5</span></td><td><span class="desc">Ocena treningu. Musi być liczbą całkowitą od 1 do 5.</span></td></tr>
+            <tr><td><code>cwiczenia</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string[]</span></td><td><span class="desc">Tablica nazw ćwiczeń wykonanych na treningu, np. <code style="font-family:var(--mono);font-size:11px">["Cavaletti w kłusie", "Ósemka"]</code>.</span></td></tr>
+            <tr><td><code>uwagi</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Ogólne uwagi instruktora z treningu.</span></td></tr>
+            <tr><td><code>dobrze</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co poszło dobrze na tym treningu.</span></td></tr>
+            <tr><td><code>do_poprawy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co wymaga poprawy — pole do śledzenia postępów.</span></td></tr>
           </tbody>
         </table>
         <div class="section-label">Przykładowe żądanie</div>
@@ -289,41 +293,101 @@
           <pre id="c-create-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening</span> \
   <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;TOKEN&gt;"</span> \
   <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{"jezdziec":"Kasia","kon":"Bryza","ocena":4,"cwiczenia":["Koła 20m"]}'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  <span class="t-flag">-d</span> <span class="t-str">'{
+    "jezdziec": "Kasia",
+    "kon": "Bryza",
+    "data": "2026-06-15",
+    "typ_jazdy": "plac",
+    "ocena": 4,
+    "cwiczenia": ["Cavaletti w kłusie", "Koła 20 m", "Półsiad w galopie"],
+    "uwagi": "Dobry trening, Kasia bardzo skupiona.",
+    "dobrze": "Równowaga w galopie znacznie lepsza.",
+    "do_poprawy": "Anglezowanie — wciąż gubi rytm."
+  }'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
           <pre id="c-create-js" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>, {
   method: <span class="t-str">"POST"</span>,
-  headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>, <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span> },
-  body: JSON.stringify({ jezdziec: <span class="t-str">"Kasia"</span>, kon: <span class="t-str">"Bryza"</span>, ocena: <span class="t-num">4</span> }),
-});</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-          <pre id="c-create-py" style="display:none"><code>res = requests.post(
+  headers: {
+    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>,
+    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+  },
+  body: JSON.stringify({
+    jezdziec: <span class="t-str">"Kasia"</span>,
+    kon: <span class="t-str">"Bryza"</span>,
+    data: <span class="t-str">"2026-06-15"</span>,
+    typ_jazdy: <span class="t-str">"plac"</span>,
+    ocena: <span class="t-num">4</span>,
+    cwiczenia: [<span class="t-str">"Cavaletti w kłusie"</span>, <span class="t-str">"Koła 20 m"</span>],
+    uwagi: <span class="t-str">"Dobry trening, Kasia bardzo skupiona."</span>,
+    dobrze: <span class="t-str">"Równowaga w galopie znacznie lepsza."</span>,
+    do_poprawy: <span class="t-str">"Anglezowanie — wciąż gubi rytm."</span>,
+  }),
+});
+<span class="t-key">const</span> { id, data, jezdziec, ocena } = <span class="t-key">await</span> res.json();</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="c-create-py" style="display:none"><code><span class="t-key">import</span> requests
+
+res = requests.post(
     <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/nowy-trening"</span>,
     headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {TOKEN}"</span>},
-    json={<span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>, <span class="t-str">"ocena"</span>: <span class="t-num">4</span>},
-)</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+    json={
+        <span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
+        <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>,
+        <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+        <span class="t-str">"typ_jazdy"</span>: <span class="t-str">"plac"</span>,
+        <span class="t-str">"ocena"</span>: <span class="t-num">4</span>,
+        <span class="t-str">"cwiczenia"</span>: [<span class="t-str">"Cavaletti w kłusie"</span>, <span class="t-str">"Koła 20 m"</span>],
+        <span class="t-str">"uwagi"</span>: <span class="t-str">"Dobry trening, Kasia bardzo skupiona."</span>,
+    },
+)
+res.raise_for_status()
+print(res.json())</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
         </div>
         <div class="section-label">Odpowiedź</div>
         <div class="response-wrap">
           <div class="response-tabs">
-            <button class="response-tab ok active" onclick="switchResponse(this,'cr-ok')">200 OK</button>
-            <button class="response-tab err" onclick="switchResponse(this,'cr-err')">400 / 404</button>
+            <button class="response-tab ok active" onclick="switchResponse(this,'cr-ok')">201 Created</button>
+            <button class="response-tab err" onclick="switchResponse(this,'cr-err404')">404 Not Found</button>
+            <button class="response-tab err" onclick="switchResponse(this,'cr-err400')">400 Ambiguous</button>
           </div>
-          <div class="response-body active" id="cr-ok"><pre><code>{ <span class="t-key">"id"</span>: <span class="t-str">"3be52fa6-..."</span>, <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>, <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-key">"ocena"</span>: <span class="t-num">4</span> }</code></pre></div>
-          <div class="response-body" id="cr-err"><pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Nie znaleziono jeźdźca: \"Kasia\"."</span> }
-{ <span class="t-key">"error"</span>: <span class="t-str">"Niejednoznaczne imię."</span>, <span class="t-key">"kandydaci"</span>: [<span class="t-str">"Kasia"</span>, <span class="t-str">"Kamila"</span>] }</code></pre></div>
+          <div class="response-body active" id="cr-ok"><pre><code>{
+  <span class="t-key">"id"</span>: <span class="t-str">"8a8933e4-526b-4c9e-9cc2-ce2776735d3a"</span>,
+  <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+  <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,   <span class="t-cmt">// pełne imię z bazy</span>
+  <span class="t-key">"ocena"</span>: <span class="t-num">4</span>
+}</code></pre></div>
+          <div class="response-body" id="cr-err404"><pre><code><span class="t-cmt">// Jeźdźca nie ma w bazie</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Nie znaleziono jeźdźca: \"Kasik\"."</span> }
+
+<span class="t-cmt">// Koń nie znaleziony</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Nie znaleziono konia pasującego do: \"Bły\"."</span> }</code></pre></div>
+          <div class="response-body" id="cr-err400"><pre><code><span class="t-cmt">// Więcej niż jeden jeździec pasuje do frazy</span>
+{
+  <span class="t-key">"error"</span>: <span class="t-str">"Niejednoznaczne imię: \"Ka\". Podaj dokładniejsze imię."</span>,
+  <span class="t-key">"kandydaci"</span>: [<span class="t-str">"Kasia"</span>, <span class="t-str">"Kamila"</span>, <span class="t-str">"Karolina"</span>]
+}
+
+<span class="t-cmt">// Nieprawidłowa ocena</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'ocena' musi być liczbą całkowitą od 1 do 5."</span> }
+
+<span class="t-cmt">// Brak wymaganego pola</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'jezdziec' jest wymagane."</span> }</code></pre></div>
         </div>
       </div>
 
       <span class="anchor" id="api-ask"></span>
       <div class="endpoint-section">
-        <div class="endpoint-header"><span class="method-badge post">POST</span><h2>Ask</h2></div>
-        <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek. Agent automatycznie pobiera kontekst z bazy.</p>
+        <div class="endpoint-header"><span class="method-badge post">POST</span><h2>Ask — zapytaj agenta</h2></div>
+        <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek w języku naturalnym. Agent automatycznie zaciąga kontekst z bazy — treningi z danego dnia, listę jeźdźców i koni. Gdy potrzebuje danych historycznych, wywołuje narzędzia wewnętrzne (<code style="font-family:var(--mono);font-size:12px">pobierz_treningi</code>, <code style="font-family:var(--mono);font-size:12px">pobierz_jezdzca</code>) i odpowiada po zebraniu wszystkich informacji. Może zająć do kilku sekund.</p>
         <div class="url-box"><span class="method-label post">POST</span><code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</code></div>
+        <div class="callout purple" style="margin-bottom:24px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Agent używa modelu <strong>Grok-4.3</strong> (xAI) z pętlą agentic do max 5 iteracji. Timeout na Vercelu ustawiony na 60 s. Odpowiedź zawsze jest w polu <code style="font-family:var(--mono);font-size:11px">odpowiedz</code>.</span>
+        </div>
         <div class="section-label">Body parameters</div>
         <table>
           <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
           <tbody>
-            <tr><td><code>pytanie</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Pytanie w języku naturalnym.</span></td></tr>
-            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Dzień kontekstu YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
+            <tr><td><code>pytanie</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Pytanie w języku naturalnym, np. <em>„Jak postępuje Kasia?"</em>, <em>„Ile treningów było w tym tygodniu?"</em>, <em>„Co ćwiczyliśmy najczęściej?"</em></span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Dzień kontekstu w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Agent widzi treningi z tego dnia jako „dzisiejsze". Domyślnie: dzisiaj.</span></td></tr>
           </tbody>
         </table>
         <div class="section-label">Przykładowe żądanie</div>
@@ -331,62 +395,135 @@
           <div class="code-tabs">
             <button class="code-tab active" onclick="switchCodeTab(this,'c-ask-curl')">cURL</button>
             <button class="code-tab" onclick="switchCodeTab(this,'c-ask-js')">JavaScript</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'c-ask-py')">Python</button>
           </div>
           <pre id="c-ask-curl"><code><span class="t-meth">curl</span> <span class="t-flag">-X POST</span> <span class="t-url">https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj</span> \
   <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;TOKEN&gt;"</span> \
   <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
-  <span class="t-flag">-d</span> <span class="t-str">'{"pytanie":"Jak postępuje Kasia?","data":"2026-06-15"}'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  <span class="t-flag">-d</span> <span class="t-str">'{"pytanie":"Jak postępuje Kasia w ostatnim miesiącu?","data":"2026-06-15"}'</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
           <pre id="c-ask-js" style="display:none"><code><span class="t-key">const</span> { odpowiedz } = <span class="t-key">await</span> fetch(<span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj"</span>, {
   method: <span class="t-str">"POST"</span>,
-  headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>, <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span> },
-  body: JSON.stringify({ pytanie: <span class="t-str">"Jak postępuje Kasia?"</span> }),
-}).then(r => r.json());</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  headers: {
+    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>,
+    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+  },
+  body: JSON.stringify({
+    pytanie: <span class="t-str">"Jak postępuje Kasia w ostatnim miesiącu?"</span>,
+    data: <span class="t-str">"2026-06-15"</span>,
+  }),
+}).then(r => r.json());
+
+console.log(odpowiedz); <span class="t-cmt">// tekst odpowiedzi agenta</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="c-ask-py" style="display:none"><code><span class="t-key">import</span> requests
+
+res = requests.post(
+    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/zapytaj"</span>,
+    headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {TOKEN}"</span>},
+    json={
+        <span class="t-str">"pytanie"</span>: <span class="t-str">"Jak postępuje Kasia w ostatnim miesiącu?"</span>,
+        <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+    },
+    timeout=<span class="t-num">60</span>,
+)
+print(res.json()[<span class="t-str">"odpowiedz"</span>])</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
         </div>
         <div class="section-label">Odpowiedź</div>
         <div class="response-wrap">
           <div class="response-tabs">
             <button class="response-tab ok active" onclick="switchResponse(this,'ar-ok')">200 OK</button>
-            <button class="response-tab err" onclick="switchResponse(this,'ar-err')">400</button>
+            <button class="response-tab err" onclick="switchResponse(this,'ar-err')">400 / 500</button>
           </div>
-          <div class="response-body active" id="ar-ok"><pre><code>{ <span class="t-key">"odpowiedz"</span>: <span class="t-str">"Kasia ma 6 treningów w ostatnim miesiącu. Widać postęp w galopie — oceny wzrosły z 3 do 5. 💪"</span> }</code></pre></div>
-          <div class="response-body" id="ar-err"><pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'pytanie' jest wymagane."</span> }</code></pre></div>
+          <div class="response-body active" id="ar-ok"><pre><code>{
+  <span class="t-key">"odpowiedz"</span>: <span class="t-str">"Kasia trenowała 8 razy w czerwcu. Średnia ocena wynosi 4.2/5 — widać wyraźny postęp w galopie (oceny wzrosły z 3 na 4–5). Najczęściej ćwiczyła na placu, głównie cavaletti i koła 20 m. Do poprawy wciąż zostaje anglezowanie — pojawia się w notatkach 5 na 8 treningów."</span>
+}</code></pre></div>
+          <div class="response-body" id="ar-err"><pre><code><span class="t-cmt">// Brak wymaganego pola</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Pole 'pytanie' jest wymagane."</span> }
+
+<span class="t-cmt">// Błąd zewnętrznego API (Grok)</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Grok API error: 429 Too Many Requests"</span> }
+
+<span class="t-cmt">// Brak klucza API w zmiennych środowiskowych</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Brak klucza GROK_API_KEY"</span> }</code></pre></div>
         </div>
       </div>
 
       <span class="anchor" id="api-read"></span>
       <div class="endpoint-section">
-        <div class="endpoint-header"><span class="method-badge get">GET</span><h2>Read</h2></div>
-        <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia. Imiona zdekodowane — bez UUID.</p>
+        <div class="endpoint-header"><span class="method-badge get">GET</span><h2>Read — treningi dnia</h2></div>
+        <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia, posortowane chronologicznie. UUID jeźdźców i koni są automatycznie zdekodowane na czytelne imiona. Gdy brak treningów dla danej daty, zwraca pustą tablicę i <code style="font-family:var(--mono);font-size:12px">liczba: 0</code>.</p>
         <div class="url-box"><span class="method-label get">GET</span><code>https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15</code></div>
         <div class="section-label">Query parameters</div>
         <table>
           <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
-          <tbody><tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr></tbody>
+          <tbody><tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data w formacie <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiejsza data. Nieprawidłowy format zwraca błąd 400.</span></td></tr></tbody>
         </table>
         <div class="section-label">Przykładowe żądanie</div>
         <div class="code-block-wrap">
           <div class="code-tabs">
             <button class="code-tab active" onclick="switchCodeTab(this,'c-read-curl')">cURL</button>
             <button class="code-tab" onclick="switchCodeTab(this,'c-read-js')">JavaScript</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'c-read-py')">Python</button>
           </div>
           <pre id="c-read-curl"><code><span class="t-meth">curl</span> <span class="t-url">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span> \
   <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer &lt;TOKEN&gt;"</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
-          <pre id="c-read-js" style="display:none"><code><span class="t-key">const</span> { treningi } = <span class="t-key">await</span> fetch(
+          <pre id="c-read-js" style="display:none"><code><span class="t-key">const</span> { data, liczba, treningi } = <span class="t-key">await</span> fetch(
   <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia?data=2026-06-15"</span>,
   { headers: { <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span> } }
-).then(r => r.json());</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+).then(r => r.json());
+
+console.log(<span class="t-str">`${liczba} treningów dnia ${data}`</span>);</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="c-read-py" style="display:none"><code>res = requests.get(
+    <span class="t-str">"https://asxvphinpnhjfrqibfka.supabase.co/functions/v1/trening-dnia"</span>,
+    params={<span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>},
+    headers={<span class="t-str">"Authorization"</span>: <span class="t-str">f"Bearer {TOKEN}"</span>},
+)
+payload = res.json()
+<span class="t-key">for</span> t <span class="t-key">in</span> payload[<span class="t-str">"treningi"</span>]:
+    print(t[<span class="t-str">"jezdziec"</span>], t[<span class="t-str">"typ_jazdy"</span>], t[<span class="t-str">"ocena"</span>])</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
         </div>
         <div class="section-label">Odpowiedź</div>
         <div class="response-wrap">
           <div class="response-tabs">
             <button class="response-tab ok active" onclick="switchResponse(this,'rr-ok')">200 OK</button>
+            <button class="response-tab ok" onclick="switchResponse(this,'rr-empty')">200 (brak treningów)</button>
             <button class="response-tab err" onclick="switchResponse(this,'rr-err')">400</button>
           </div>
           <div class="response-body active" id="rr-ok"><pre><code>{
-  <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>, <span class="t-key">"liczba"</span>: <span class="t-num">1</span>,
-  <span class="t-key">"treningi"</span>: [{
-    <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-key">"kon"</span>: <span class="t-str">"Bryza"</span>, <span class="t-key">"typ_jazdy"</span>: <span class="t-str">"plac"</span>, <span class="t-key">"ocena"</span>: <span class="t-num">4</span>
-  }]
+  <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+  <span class="t-key">"liczba"</span>: <span class="t-num">2</span>,
+  <span class="t-key">"treningi"</span>: [
+    {
+      <span class="t-key">"id"</span>: <span class="t-str">"8a8933e4-526b-4c9e-9cc2-ce2776735d3a"</span>,
+      <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+      <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
+      <span class="t-key">"kon"</span>: <span class="t-str">"Bryza"</span>,
+      <span class="t-key">"typ_jazdy"</span>: <span class="t-str">"plac"</span>,
+      <span class="t-key">"grupowa"</span>: <span class="t-bool">false</span>,
+      <span class="t-key">"cwiczenia"</span>: [<span class="t-str">"Cavaletti w kłusie"</span>, <span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Półsiad w galopie"</span>],
+      <span class="t-key">"uwagi"</span>: <span class="t-str">"Dobry trening, Kasia bardzo skupiona."</span>,
+      <span class="t-key">"dobrze"</span>: <span class="t-str">"Równowaga w galopie znacznie lepsza."</span>,
+      <span class="t-key">"do_poprawy"</span>: <span class="t-str">"Anglezowanie — wciąż gubi rytm."</span>,
+      <span class="t-key">"ocena"</span>: <span class="t-num">4</span>
+    },
+    {
+      <span class="t-key">"id"</span>: <span class="t-str">"f1a2b3c4-..."</span>,
+      <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+      <span class="t-key">"jezdziec"</span>: <span class="t-str">"Ania"</span>,
+      <span class="t-key">"kon"</span>: <span class="t-null">null</span>,   <span class="t-cmt">// brak przypisanego konia</span>
+      <span class="t-key">"typ_jazdy"</span>: <span class="t-str">"lonża"</span>,
+      <span class="t-key">"grupowa"</span>: <span class="t-bool">false</span>,
+      <span class="t-key">"cwiczenia"</span>: [<span class="t-str">"Kłus anglezowany"</span>],
+      <span class="t-key">"uwagi"</span>: <span class="t-null">null</span>,
+      <span class="t-key">"dobrze"</span>: <span class="t-null">null</span>,
+      <span class="t-key">"do_poprawy"</span>: <span class="t-null">null</span>,
+      <span class="t-key">"ocena"</span>: <span class="t-num">3</span>
+    }
+  ]
+}</code></pre></div>
+          <div class="response-body" id="rr-empty"><pre><code>{
+  <span class="t-key">"data"</span>: <span class="t-str">"2026-01-01"</span>,
+  <span class="t-key">"liczba"</span>: <span class="t-num">0</span>,
+  <span class="t-key">"treningi"</span>: []
 }</code></pre></div>
           <div class="response-body" id="rr-err"><pre><code>{ <span class="t-key">"error"</span>: <span class="t-str">"Nieprawidłowy format daty. Użyj YYYY-MM-DD."</span> }</code></pre></div>
         </div>
@@ -524,66 +661,216 @@ URL   = <span class="t-str">"https://mcp-server-phi-seven.vercel.app/mcp"</span>
       <span class="anchor" id="mcp-add-training"></span>
       <div class="endpoint-section">
         <div class="endpoint-header"><span class="method-badge tool">tool</span><h2>add_training</h2></div>
-        <p class="endpoint-desc">Dodaje nowy wpis treningowy. Odpowiada REST <code style="font-family:var(--mono);font-size:12px">POST /nowy-trening</code>.</p>
+        <p class="endpoint-desc">Dodaje nowy wpis treningowy do dziennika. Proxy dla REST <code style="font-family:var(--mono);font-size:12px">POST /nowy-trening</code>. Jeźdźca wyszukuje po fragmencie imienia — wystarczy kilka liter. Gdy imię niejednoznaczne, zwraca błąd z listą kandydatów.</p>
         <div class="url-box"><span class="method-label tool">tool</span><code>add_training</code></div>
         <div class="section-label">Parametry</div>
         <table>
           <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
           <tbody>
-            <tr><td><code>jezdziec</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię jeźdźca (lub fragment).</span></td></tr>
-            <tr><td><code>kon</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię konia.</span></td></tr>
-            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
-            <tr><td><code>typ_jazdy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">enum</span></td><td><span class="desc">plac · teren · skoki · ujeżdżenie · lonża · inne</span></td></tr>
-            <tr><td><code>ocena</code><span class="opt-badge">optional</span></td><td><span class="type-badge">number</span></td><td><span class="desc">Ocena 1–5.</span></td></tr>
-            <tr><td><code>cwiczenia</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string[]</span></td><td><span class="desc">Lista ćwiczeń.</span></td></tr>
-            <tr><td><code>uwagi</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Ogólne uwagi.</span></td></tr>
-            <tr><td><code>dobrze</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co poszło dobrze.</span></td></tr>
-            <tr><td><code>do_poprawy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co wymaga poprawy.</span></td></tr>
-            <tr><td><code>grupowa</code><span class="opt-badge">optional</span></td><td><span class="type-badge">boolean</span></td><td><span class="desc">Trening grupowy. Domyślnie false.</span></td></tr>
+            <tr><td><code>jezdziec</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię jeźdźca lub fragment (case-insensitive). Np. <code style="font-family:var(--mono);font-size:11px">"Kas"</code> znajdzie Kasię.</span></td></tr>
+            <tr><td><code>kon</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Imię konia (też fragment). Bez konia wpis zapisuje się bez konia.</span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiaj.</span></td></tr>
+            <tr><td><code>typ_jazdy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">enum</span></td><td><span class="desc"><code style="font-family:var(--mono);font-size:11px">plac</code> (domyślnie) · <code style="font-family:var(--mono);font-size:11px">teren</code> · <code style="font-family:var(--mono);font-size:11px">skoki</code> · <code style="font-family:var(--mono);font-size:11px">ujeżdżenie</code> · <code style="font-family:var(--mono);font-size:11px">lonża</code> · <code style="font-family:var(--mono);font-size:11px">inne</code></span></td></tr>
+            <tr><td><code>ocena</code><span class="opt-badge">optional</span></td><td><span class="type-badge">integer 1–5</span></td><td><span class="desc">Ocena treningu (liczba całkowita).</span></td></tr>
+            <tr><td><code>cwiczenia</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string[]</span></td><td><span class="desc">Tablica nazw ćwiczeń z treningu.</span></td></tr>
+            <tr><td><code>uwagi</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Ogólne uwagi instruktora.</span></td></tr>
+            <tr><td><code>dobrze</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co poszło dobrze — pole do śledzenia postępów.</span></td></tr>
+            <tr><td><code>do_poprawy</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Co wymaga dalszej pracy.</span></td></tr>
+            <tr><td><code>grupowa</code><span class="opt-badge">optional</span></td><td><span class="type-badge">boolean</span></td><td><span class="desc">Czy trening był grupowy. Domyślnie <code style="font-family:var(--mono);font-size:11px">false</code>.</span></td></tr>
           </tbody>
         </table>
-        <div class="section-label">Przykład</div>
-        <pre class="solo"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"add_training"</span>, {
-    <span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>, <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>, <span class="t-str">"ocena"</span>: <span class="t-num">4</span>,
-    <span class="t-str">"cwiczenia"</span>: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>],
-})</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <div class="section-label">Przykład wywołania</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchCodeTab(this,'mcp-at-py')">Python SDK</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'mcp-at-http')">HTTP (fetch)</button>
+          </div>
+          <pre id="mcp-at-py"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"add_training"</span>, {
+    <span class="t-str">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
+    <span class="t-str">"kon"</span>: <span class="t-str">"Bryza"</span>,
+    <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+    <span class="t-str">"typ_jazdy"</span>: <span class="t-str">"plac"</span>,
+    <span class="t-str">"ocena"</span>: <span class="t-num">4</span>,
+    <span class="t-str">"cwiczenia"</span>: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Kłus bez strzemion"</span>, <span class="t-str">"Cavaletti w galopie"</span>],
+    <span class="t-str">"dobrze"</span>: <span class="t-str">"Piękny galop, utrzymała tempo przez całe koło."</span>,
+    <span class="t-str">"do_poprawy"</span>: <span class="t-str">"Ręka — wciąż za twarda na zwrotach."</span>,
+})
+<span class="t-cmt"># result.content[0].text → JSON string z id, data, jezdziec, ocena</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="mcp-at-http" style="display:none"><code><span class="t-cmt">// Bezpośrednie wywołanie HTTP (bez sesji MCP)</span>
+<span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://mcp-server-phi-seven.vercel.app/mcp"</span>, {
+  method: <span class="t-str">"POST"</span>,
+  headers: {
+    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>,
+    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+    <span class="t-str">"Accept"</span>: <span class="t-str">"application/json, text/event-stream"</span>,
+  },
+  body: JSON.stringify({
+    jsonrpc: <span class="t-str">"2.0"</span>, id: <span class="t-num">1</span>, method: <span class="t-str">"tools/call"</span>,
+    params: {
+      name: <span class="t-str">"add_training"</span>,
+      arguments: { jezdziec: <span class="t-str">"Kasia"</span>, ocena: <span class="t-num">4</span>, cwiczenia: [<span class="t-str">"Koła 20 m"</span>] },
+    },
+  }),
+});</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+        <div class="section-label">Odpowiedź (result.content[0].text)</div>
+        <div class="response-wrap">
+          <div class="response-tabs">
+            <button class="response-tab ok active" onclick="switchResponse(this,'mat-ok')">Sukces</button>
+            <button class="response-tab err" onclick="switchResponse(this,'mat-err')">Błąd</button>
+          </div>
+          <div class="response-body active" id="mat-ok"><pre><code>{
+  <span class="t-key">"id"</span>: <span class="t-str">"8a8933e4-526b-4c9e-9cc2-ce2776735d3a"</span>,
+  <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+  <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
+  <span class="t-key">"ocena"</span>: <span class="t-num">4</span>
+}</code></pre></div>
+          <div class="response-body" id="mat-err"><pre><code><span class="t-cmt">// Niejednoznaczne imię</span>
+{
+  <span class="t-key">"error"</span>: <span class="t-str">"Niejednoznaczne imię: \"Ka\". Podaj dokładniejsze imię."</span>,
+  <span class="t-key">"kandydaci"</span>: [<span class="t-str">"Kasia"</span>, <span class="t-str">"Kamila"</span>]
+}
+
+<span class="t-cmt">// Jeździec nie istnieje</span>
+{ <span class="t-key">"error"</span>: <span class="t-str">"Nie znaleziono jeźdźca: \"Zbyszek\"."</span> }</code></pre></div>
+        </div>
       </div>
 
       <span class="anchor" id="mcp-get-trainings"></span>
       <div class="endpoint-section">
         <div class="endpoint-header"><span class="method-badge tool">tool</span><h2>get_trainings</h2></div>
-        <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia. Odpowiada REST <code style="font-family:var(--mono);font-size:12px">GET /trening-dnia</code>.</p>
+        <p class="endpoint-desc">Zwraca wszystkie wpisy treningowe z podanego dnia. Proxy dla REST <code style="font-family:var(--mono);font-size:12px">GET /trening-dnia</code>. UUIDs jeźdźców i koni są automatycznie zamieniane na imiona. Gdy brak treningów — zwraca pustą tablicę (nie błąd).</p>
         <div class="url-box"><span class="method-label tool">tool</span><code>get_trainings</code></div>
         <div class="section-label">Parametry</div>
         <table>
           <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
-          <tbody><tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr></tbody>
+          <tbody>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Data <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Domyślnie dzisiaj (serwer bierze datę z momentu wywołania).</span></td></tr>
+          </tbody>
         </table>
-        <div class="section-label">Przykład</div>
-        <pre class="solo"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"get_trainings"</span>, {<span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>})</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <div class="section-label">Przykład wywołania</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchCodeTab(this,'mcp-gt-py')">Python SDK</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'mcp-gt-http')">HTTP (fetch)</button>
+          </div>
+          <pre id="mcp-gt-py"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"get_trainings"</span>, {<span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>})
+<span class="t-cmt"># result.content[0].text → JSON string z polami data, liczba, treningi[]</span>
+data = json.loads(result.content[<span class="t-num">0</span>].text)
+<span class="t-key">for</span> t <span class="t-key">in</span> data[<span class="t-str">"treningi"</span>]:
+    print(t[<span class="t-str">"jezdziec"</span>], t[<span class="t-str">"ocena"</span>])</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="mcp-gt-http" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://mcp-server-phi-seven.vercel.app/mcp"</span>, {
+  method: <span class="t-str">"POST"</span>,
+  headers: {
+    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>,
+    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+    <span class="t-str">"Accept"</span>: <span class="t-str">"application/json, text/event-stream"</span>,
+  },
+  body: JSON.stringify({
+    jsonrpc: <span class="t-str">"2.0"</span>, id: <span class="t-num">1</span>, method: <span class="t-str">"tools/call"</span>,
+    params: { name: <span class="t-str">"get_trainings"</span>, arguments: { data: <span class="t-str">"2026-06-15"</span> } },
+  }),
+});</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        </div>
+        <div class="section-label">Odpowiedź (result.content[0].text)</div>
+        <div class="response-wrap">
+          <div class="response-tabs">
+            <button class="response-tab ok active" onclick="switchResponse(this,'mgt-ok')">Sukces</button>
+            <button class="response-tab ok" onclick="switchResponse(this,'mgt-empty')">Brak treningów</button>
+          </div>
+          <div class="response-body active" id="mgt-ok"><pre><code>{
+  <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+  <span class="t-key">"liczba"</span>: <span class="t-num">2</span>,
+  <span class="t-key">"treningi"</span>: [
+    {
+      <span class="t-key">"id"</span>: <span class="t-str">"8a8933e4-526b-4c9e-9cc2-ce2776735d3a"</span>,
+      <span class="t-key">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+      <span class="t-key">"jezdziec"</span>: <span class="t-str">"Kasia"</span>,
+      <span class="t-key">"kon"</span>: <span class="t-str">"Bryza"</span>,
+      <span class="t-key">"typ_jazdy"</span>: <span class="t-str">"plac"</span>,
+      <span class="t-key">"grupowa"</span>: <span class="t-num">false</span>,
+      <span class="t-key">"cwiczenia"</span>: [<span class="t-str">"Koła 20 m"</span>, <span class="t-str">"Cavaletti w galopie"</span>],
+      <span class="t-key">"uwagi"</span>: <span class="t-str">""</span>,
+      <span class="t-key">"dobrze"</span>: <span class="t-str">"Piękny galop."</span>,
+      <span class="t-key">"do_poprawy"</span>: <span class="t-str">"Ręka za twarda."</span>,
+      <span class="t-key">"ocena"</span>: <span class="t-num">4</span>
+    },
+    {
+      <span class="t-key">"id"</span>: <span class="t-str">"1c3f89bb-aaaa-bbbb-cccc-ddddeeee1234"</span>,
+      <span class="t-key">"jezdziec"</span>: <span class="t-str">"Ala"</span>, <span class="t-key">"kon"</span>: <span class="t-str">"Orkan"</span>, <span class="t-key">"typ_jazdy"</span>: <span class="t-str">"skoki"</span>,
+      <span class="t-key">"ocena"</span>: <span class="t-num">5</span>
+    }
+  ]
+}</code></pre></div>
+          <div class="response-body" id="mgt-empty"><pre><code>{ <span class="t-key">"data"</span>: <span class="t-str">"2026-01-01"</span>, <span class="t-key">"liczba"</span>: <span class="t-num">0</span>, <span class="t-key">"treningi"</span>: [] }</code></pre></div>
+        </div>
       </div>
 
       <span class="anchor" id="mcp-ask-agent"></span>
       <div class="endpoint-section">
         <div class="endpoint-header"><span class="method-badge tool">tool</span><h2>ask_agent</h2></div>
-        <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek. Odpowiada REST <code style="font-family:var(--mono);font-size:12px">POST /zapytaj</code>.</p>
+        <p class="endpoint-desc">Zadaje pytanie agentowi AI Cwałek i zwraca odpowiedź w naturalnym języku. Proxy dla REST <code style="font-family:var(--mono);font-size:12px">POST /zapytaj</code>. Agent (Grok-4.3) automatycznie sięga po dane z bazy — możesz pytać o dowolnego jeźdźca lub dowolny dzień bez podawania ID.</p>
         <div class="url-box"><span class="method-label tool">tool</span><code>ask_agent</code></div>
+        <div class="callout purple">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Model: <strong>Grok-4.3</strong> (xAI). Pętla agentyczna do 5 iteracji — może wywołać wewnętrzne narzędzia (<code style="font-family:var(--mono);font-size:11px">pobierz_treningi</code>, <code style="font-family:var(--mono);font-size:11px">pobierz_jezdzca</code>) zanim odpowie. Limit: <code style="font-family:var(--mono);font-size:11px">maxDuration: 60s</code>.</span>
+        </div>
         <div class="section-label">Parametry</div>
         <table>
           <thead><tr><th>Parametr</th><th>Typ</th><th>Opis</th></tr></thead>
           <tbody>
-            <tr><td><code>pytanie</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Pytanie w języku naturalnym.</span></td></tr>
-            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Dzień kontekstu YYYY-MM-DD. Domyślnie dzisiaj.</span></td></tr>
+            <tr><td><code>pytanie</code><span class="req-badge">required</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Pytanie w języku naturalnym. Może dotyczyć postępów jeźdźca, podsumowania dnia, porównania zajęć itp.</span></td></tr>
+            <tr><td><code>data</code><span class="opt-badge">optional</span></td><td><span class="type-badge">string</span></td><td><span class="desc">Dzień kontekstu <code style="font-family:var(--mono);font-size:11px">YYYY-MM-DD</code>. Agent używa tej daty przy pobieraniu treningów. Domyślnie dzisiaj.</span></td></tr>
           </tbody>
         </table>
-        <div class="callout info">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-          <span>Ten tool wywołuje model AI i może zająć kilka sekund. Vercel ustawiony na <code style="font-family:var(--mono);font-size:11px">maxDuration: 60s</code>.</span>
+        <div class="section-label">Przykład wywołania</div>
+        <div class="code-block-wrap">
+          <div class="code-tabs">
+            <button class="code-tab active" onclick="switchCodeTab(this,'mcp-aa-py')">Python SDK</button>
+            <button class="code-tab" onclick="switchCodeTab(this,'mcp-aa-http')">HTTP (fetch)</button>
+          </div>
+          <pre id="mcp-aa-py"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"ask_agent"</span>, {
+    <span class="t-str">"pytanie"</span>: <span class="t-str">"Jakie postępy zrobiła Kasia w ostatnich zajęciach?"</span>,
+    <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>,
+})
+<span class="t-cmt"># result.content[0].text → string z odpowiedzią agenta</span>
+print(result.content[<span class="t-num">0</span>].text)</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+          <pre id="mcp-aa-http" style="display:none"><code><span class="t-key">const</span> res = <span class="t-key">await</span> fetch(<span class="t-str">"https://mcp-server-phi-seven.vercel.app/mcp"</span>, {
+  method: <span class="t-str">"POST"</span>,
+  headers: {
+    <span class="t-str">"Authorization"</span>: <span class="t-str">`Bearer ${TOKEN}`</span>,
+    <span class="t-str">"Content-Type"</span>: <span class="t-str">"application/json"</span>,
+    <span class="t-str">"Accept"</span>: <span class="t-str">"application/json, text/event-stream"</span>,
+  },
+  body: JSON.stringify({
+    jsonrpc: <span class="t-str">"2.0"</span>, id: <span class="t-num">1</span>, method: <span class="t-str">"tools/call"</span>,
+    params: {
+      name: <span class="t-str">"ask_agent"</span>,
+      arguments: { pytanie: <span class="t-str">"Co ćwiczyłyśmy dziś z Kasią?"</span>, data: <span class="t-str">"2026-06-15"</span> },
+    },
+  }),
+});</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
         </div>
-        <div class="section-label">Przykład</div>
-        <pre class="solo"><code>result = <span class="t-key">await</span> session.call_tool(<span class="t-str">"ask_agent"</span>, {
-    <span class="t-str">"pytanie"</span>: <span class="t-str">"Jakie postępy robi Kasia?"</span>, <span class="t-str">"data"</span>: <span class="t-str">"2026-06-15"</span>
-})</code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+        <div class="section-label">Odpowiedź (result.content[0].text)</div>
+        <div class="response-wrap">
+          <div class="response-tabs">
+            <button class="response-tab ok active" onclick="switchResponse(this,'maa-ok')">Sukces</button>
+            <button class="response-tab err" onclick="switchResponse(this,'maa-err')">Błąd</button>
+          </div>
+          <div class="response-body active" id="maa-ok"><pre><code><span class="t-cmt">// result.content[0].text to plain string (nie JSON)</span>
+<span class="t-str">"Na dzisiejszym treningu Kasia pracowała nad kołami 20 m i kłusem bez strzemion. Galop był wyraźnie pewniejszy niż poprzednio — utrzymała tempo przez całe koło bez tracenia rytmu. Główna uwaga na kolejne zajęcia: miękkość ręki na zwrotach. Ocena: 4/5."</span></code></pre></div>
+          <div class="response-body" id="maa-err"><pre><code><span class="t-cmt">// Błąd brakującego pola (przez MCP content)</span>
+{
+  <span class="t-key">"content"</span>: [{ <span class="t-key">"type"</span>: <span class="t-str">"text"</span>, <span class="t-key">"text"</span>: <span class="t-str">"Błąd: brak pola 'pytanie'."</span> }],
+  <span class="t-key">"isError"</span>: <span class="t-num">true</span>
+}
+
+<span class="t-cmt">// Timeout Grok (>60s)</span>
+{
+  <span class="t-key">"content"</span>: [{ <span class="t-key">"type"</span>: <span class="t-str">"text"</span>, <span class="t-key">"text"</span>: <span class="t-str">"Błąd: przekroczono limit czasu odpowiedzi."</span> }],
+  <span class="t-key">"isError"</span>: <span class="t-num">true</span>
+}</code></pre></div>
+        </div>
       </div>
     </div>
 
