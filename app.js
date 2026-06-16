@@ -669,7 +669,7 @@ window.zapiszTrening = async () => {
   if (error) { alert("Błąd zapisu: " + error.message); return; }
   selDay = data;
   edycja = null;
-  await loadData();
+  await loadAll();
   go("start");
 }
 
