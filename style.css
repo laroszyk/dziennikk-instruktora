@@ -125,7 +125,7 @@ h1.big{font-size:21px;font-weight:700;margin:4px 0 14px;letter-spacing:-.01em;co
 .row .aside{font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap}
 
 /* ===== Pasek dolny ===== */
-.tabbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:2px;
+.tabbar{position:fixed;bottom:max(16px, env(safe-area-inset-bottom, 16px));left:50%;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:2px;
   background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border:1px solid var(--hair);border-radius:32px;
   padding:7px 10px;box-shadow:0 10px 30px rgba(58,63,59,.12)}
 .tab{background:none;border:none;color:#C0C5C0;width:44px;height:44px;border-radius:50%;
