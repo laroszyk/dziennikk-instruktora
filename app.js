@@ -427,21 +427,49 @@ window.renderFormKon = function () {
     </select>
     <label class="f">Charakterystyka</label>
     <textarea class="f" id="nk-opis" rows="3" placeholder="Temperament, do czego się nadaje..."></textarea>
-    <label class="f">Link do zdjęcia (opcjonalnie)</label>
+    <label class="f">Zdjęcie (opcjonalnie)</label>
+    <div class="foto-upload-box" id="foto-box" onclick="document.getElementById('nk-plik').click()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <span id="foto-label">Dotknij, aby dodać zdjęcie</span>
+      <input type="file" id="nk-plik" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewFoto(this)" />
+    </div>
+    <img id="nk-preview" style="display:none;width:100%;border-radius:16px;margin-top:10px;max-height:220px;object-fit:cover" />
+    <label class="f" style="margin-top:12px">…lub wklej link do zdjęcia</label>
     <input class="f" id="nk-foto" type="text" placeholder="https://..." />
     <button class="btn-primary" onclick="zapiszKonia()">Zapisz konia</button>`;
   initCustomSelects();
   window.scrollTo(0, 0);
 };
+window.previewFoto = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById("nk-preview");
+  const label = document.getElementById("foto-label");
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+  label.textContent = file.name;
+};
 window.zapiszKonia = async () => {
   const imie = document.getElementById("nk-imie").value.trim();
   if (!imie) { alert("Podaj imię konia."); return; }
+  const btn = document.querySelector(".btn-primary");
+  btn.disabled = true; btn.textContent = "Zapisywanie...";
+  let fotoUrl = document.getElementById("nk-foto").value.trim() || null;
+  const plik = document.getElementById("nk-plik").files[0];
+  if (plik) {
+    const ext = plik.name.split(".").pop();
+    const path = `${Date.now()}-${imie.replace(/\s+/g, "-")}.${ext}`;
+    const { error: upErr } = await db.storage.from("konie").upload(path, plik, { contentType: plik.type });
+    if (upErr) { alert("Błąd przesyłania zdjęcia: " + upErr.message); btn.disabled = false; btn.textContent = "Zapisz konia"; return; }
+    const { data } = db.storage.from("konie").getPublicUrl(path);
+    fotoUrl = data.publicUrl;
+  }
   const { error } = await db.from("konie").insert({
     imie, typ: document.getElementById("nk-typ").value,
     charakterystyka: document.getElementById("nk-opis").value.trim() || null,
-    zdjecie_url: document.getElementById("nk-foto").value.trim() || null
+    zdjecie_url: fotoUrl
   });
-  if (error) { alert("Błąd: " + error.message); return; }
+  if (error) { alert("Błąd: " + error.message); btn.disabled = false; btn.textContent = "Zapisz konia"; return; }
   await loadAll(); go("konie");
 };
 
