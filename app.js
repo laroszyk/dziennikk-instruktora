@@ -298,6 +298,7 @@ function renderJezdzcy(filter) {
 }
 
 window.renderFormJezdziec = function () {
+  const konieOpcje = konie.map(k => `<option value="${esc(k.imie)}">${esc(k.imie)}</option>`).join("");
   content().innerHTML = `
     <button class="btn-back" onclick="go('jezdzcy')">← Anuluj</button>
     <h1 class="big">Nowy jeździec</h1>
@@ -311,6 +312,18 @@ window.renderFormJezdziec = function () {
     </select>
     <label class="f">Jeździ od</label>
     <input class="f" id="nj-od" type="text" placeholder="np. 2024" />
+    <label class="f">Umiejętności <span style="font-weight:400;color:var(--muted)">(oddziel przecinkiem)</span></label>
+    <input class="f" id="nj-umie" type="text" placeholder="np. kłus, galop, skoki" />
+    <label class="f">Do poprawy</label>
+    <input class="f" id="nj-poprawa" type="text" placeholder="np. dosiad, kontakt z wędzidłem" />
+    <label class="f">Postawa</label>
+    <input class="f" id="nj-postawa" type="text" placeholder="np. proste plecy, luźne ramiona" />
+    <label class="f">Konie</label>
+    <select class="f" id="nj-konie" multiple style="height:auto;min-height:48px">${konieOpcje}</select>
+    <label class="f">Lubi</label>
+    <input class="f" id="nj-lubi" type="text" placeholder="np. skoki, jazda w terenie" />
+    <label class="f">Notatki</label>
+    <textarea class="f" id="nj-notatki" rows="3" placeholder="Dowolne notatki o jeźdźcu..."></textarea>
     <button class="btn-primary" onclick="zapiszJezdzca()">Zapisz jeźdźca</button>`;
   initCustomSelects();
   window.scrollTo(0, 0);
@@ -318,9 +331,19 @@ window.renderFormJezdziec = function () {
 window.zapiszJezdzca = async () => {
   const imie = document.getElementById("nj-imie").value.trim();
   if (!imie) { alert("Podaj imię."); return; }
+  const split = id => (document.getElementById(id).value || "").split(",").map(s => s.trim()).filter(Boolean);
+  const konieEl = document.getElementById("nj-konie");
+  const konieVal = konieEl ? Array.from(konieEl.selectedOptions).map(o => o.value) : [];
+  const notatki = document.getElementById("nj-notatki").value.trim();
   const { error } = await db.from("jezdzcy").insert({
     imie, poziom: document.getElementById("nj-poziom").value,
-    jezdzi_od: document.getElementById("nj-od").value.trim() || null, notatki: []
+    jezdzi_od: document.getElementById("nj-od").value.trim() || null,
+    umie: split("nj-umie"),
+    poprawa: split("nj-poprawa"),
+    postawa: split("nj-postawa"),
+    konie: konieVal,
+    lubi: split("nj-lubi"),
+    notatki: notatki ? [notatki] : []
   });
   if (error) { alert("Błąd: " + error.message); return; }
   await loadAll(); go("jezdzcy");
