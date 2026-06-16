@@ -428,7 +428,9 @@ function renderKonie() {
     <div class="horse-grid">
       ${konie.map(k => `
         <div class="horse-card">
-          <div class="ph"><img src="${k.foto}" alt="${esc(k.imie)}" loading="lazy" onerror="this.style.display='none'"/></div>
+          <div class="ph" style="position:relative"><img src="${k.foto}" alt="${esc(k.imie)}" loading="lazy" onerror="this.style.display='none'"/>
+            <button class="horse-edit-btn" onclick="renderEditKon('${k.id}')" title="Edytuj">✎</button>
+          </div>
           <div class="body">
             <h3>${esc(k.imie)}</h3>
             <span class="typ">${esc(k.typ)}</span>
@@ -472,6 +474,43 @@ window.previewFoto = function(input) {
   preview.style.display = "block";
   label.textContent = file.name;
 };
+window.renderEditKon = function(id) {
+  const k = konie.find(k => k.id === id);
+  if (!k) return;
+  const typy = ['gorącokrwisty','zimnokrwisty','drobniejszy','uniwersalny','mocniejszy'];
+  content().innerHTML = `
+    <button class="btn-back" onclick="go('konie')">← Anuluj</button>
+    <h1 class="big">Edytuj: ${esc(k.imie)}</h1>
+    <label class="f">Imię *</label>
+    <input class="f" id="ek-imie" type="text" value="${esc(k.imie)}" />
+    <label class="f">Typ</label>
+    <select class="f" id="ek-typ">
+      ${typy.map(t => `<option value="${t}" ${t === k.typ ? 'selected' : ''}>${t}</option>`).join('')}
+    </select>
+    <label class="f">Charakterystyka</label>
+    <textarea class="f" id="ek-opis" rows="3">${esc(k.opis)}</textarea>
+    <label class="f">Zdjęcie (URL)</label>
+    <input class="f" id="ek-foto" type="text" value="${esc(k.foto)}" placeholder="https://..." />
+    ${k.foto ? `<img src="${esc(k.foto)}" style="width:100%;border-radius:16px;margin-top:8px;max-height:200px;object-fit:cover" onerror="this.style.display='none'" />` : ''}
+    <button class="btn-primary" onclick="zapiszEdycjeKonia('${id}')">Zapisz zmiany</button>`;
+  window.scrollTo(0, 0);
+};
+
+window.zapiszEdycjeKonia = async (id) => {
+  const imie = document.getElementById("ek-imie").value.trim();
+  if (!imie) { alert("Podaj imię konia."); return; }
+  const btn = document.querySelector(".btn-primary");
+  btn.disabled = true; btn.textContent = "Zapisywanie...";
+  const { error } = await db.from("konie").update({
+    imie,
+    typ: document.getElementById("ek-typ").value,
+    charakterystyka: document.getElementById("ek-opis").value.trim() || null,
+    zdjecie_url: document.getElementById("ek-foto").value.trim() || null
+  }).eq("id", id);
+  if (error) { alert("Błąd: " + error.message); btn.disabled = false; btn.textContent = "Zapisz zmiany"; return; }
+  await loadAll(); go("konie");
+};
+
 window.zapiszKonia = async () => {
   const imie = document.getElementById("nk-imie").value.trim();
   if (!imie) { alert("Podaj imię konia."); return; }

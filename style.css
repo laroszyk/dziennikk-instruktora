@@ -200,6 +200,8 @@ textarea.note-input:focus{outline:none;border-color:var(--sage)}
 .horse-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
 .horse-card .ph{height:134px;background:var(--sage-mist)}
 .horse-card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.horse-edit-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.85);border:none;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:.2s;backdrop-filter:blur(4px)}
+.horse-card:hover .horse-edit-btn{opacity:1}
 .horse-card .body{padding:13px 16px 15px}
 .horse-card h3{font-size:15.5px;font-weight:700;color:var(--ink-strong)}
 .horse-card .typ{display:inline-block;font-size:10px;font-weight:600;color:#B5704C;background:var(--peach-mist);
