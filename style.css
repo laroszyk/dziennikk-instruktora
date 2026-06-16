@@ -19,8 +19,8 @@
   --shadow-lg:0 10px 34px rgba(58,63,59,.10)
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{overflow-x:clip}
-body{overflow-x:hidden}
+html{overflow-x:clip;overflow-y:scroll}
+body{overflow-x:hidden;scrollbar-gutter:stable}
 body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px}
 .hidden{display:none!important}
 button{font-family:inherit;cursor:pointer}
