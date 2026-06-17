@@ -141,6 +141,7 @@ async function init() {
   if (splash) { splash.style.transition = "opacity .3s"; splash.style.opacity = "0"; setTimeout(() => splash.remove(), 320); }
 }
 async function onLogin() {
+  statsAnimated = false;
   showView("app");
   content().innerHTML = "<p class='loading'>Ładowanie…</p>";
   await loadAll();
@@ -154,7 +155,6 @@ window.logout = async () => {
 
 // ===== Dane z Supabase =====
 async function loadAll() {
-  statsAnimated = false;
   const [jz, kn] = await Promise.all([
     db.from("jezdzcy").select("*").eq("aktywny", true).order("imie"),
     db.from("konie").select("*").order("imie"),
