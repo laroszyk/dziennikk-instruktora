@@ -90,7 +90,7 @@ const SUGESTIE = {
   lubi: ["plac","teren","skoki","ujeżdżenie","lonża"]
 };
 const TYPY = ["plac","teren","lonża"];
-const KOLORY = [["#EAF2ED","#557F69"],["#FBEFE6","#B5704C"],["#EAF1F2","#5D8590"],["#F1EDF4","#8A7B99"],["#F7F1E8","#A1834C"]];
+const KOLORY = [["#B8D9C8","#2A6648"],["#F7C9AD","#9B4020"],["#B8D8DE","#24707C"],["#D8CEE8","#5C3E8A"],["#EDD9A3","#7A5415"]];
 const MCLS = ["m-sage","","m-peach","m-sand"];
 const DNI = ["niedziela","poniedziałek","wtorek","środa","czwartek","piątek","sobota"];
 const DNI_K = ["nd","pn","wt","śr","cz","pt","so"];
