@@ -230,6 +230,9 @@ function renderStart() {
   }
   const dnia = grupy(treningi.filter(t => t.data === selDay));
 
+  const streak = calcStreak();
+  const totalTreningi = grupy(treningi).length;
+
   content().innerHTML = `
     <div class="brandline">
       <span class="logo" style="font-size:21px;color:var(--ink-strong)">Cześć, Lui</span>
@@ -240,6 +243,11 @@ function renderStart() {
       </div>
     </div>
     <div class="hello">${fmtD(iso)}</div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="stat-tr">0</div><div class="stat-lbl">treningów</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-jz">0</div><div class="stat-lbl">jeźdźców</div></div>
+      <div class="stat-box streak-box"><div class="stat-num">${streak > 0 ? streak + ' 🔥' : '—'}</div><div class="stat-lbl">dni z rzędu</div></div>
+    </div>
     <div class="calbox">
       <div class="c-top">
         <b>${MIES_N[mies]} ${rok}</b>
@@ -279,6 +287,8 @@ function renderStart() {
           <span class="m">${esc(j.poziom)}</span>
         </div>`).join("")}
     </div>`;
+  animateCount(document.getElementById('stat-tr'), totalTreningi);
+  animateCount(document.getElementById('stat-jz'), jezdzcy.length);
 }
 
 // ===== JEŹDŹCY =====
@@ -731,10 +741,12 @@ window.zapiszTrening = async () => {
   }
   const { error } = await db.from("treningi").insert(rows);
   if (error) { alert("Błąd zapisu: " + error.message); return; }
+  const bylaEdycja = edycja !== null;
   selDay = data;
   edycja = null;
   await loadAll();
   go("start");
+  if (!bylaEdycja) spawnConfetti();
 }
 
 // ===== Cwałek — AI chat agent =====
@@ -847,5 +859,76 @@ const CWALEK_FN_URL = `${SUPABASE_URL}/functions/v1/chat-agent`;
     input.focus();
   }
 })();
+
+// ===== Konfetti =====
+function spawnConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9998';
+  canvas.width = innerWidth; canvas.height = innerHeight;
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const colors = ['#557F69','#F2A98B','#B5704C','#8aab97','#EAF2ED','#f7c59f'];
+  const pieces = Array.from({length: 90}, () => ({
+    x: Math.random() * canvas.width,
+    y: -10 - Math.random() * 120,
+    r: 4 + Math.random() * 5,
+    vy: 2.5 + Math.random() * 3,
+    vx: (Math.random() - 0.5) * 2,
+    rot: Math.random() * Math.PI * 2,
+    rotV: (Math.random() - 0.5) * 0.15,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    w: 6 + Math.random() * 8,
+    h: 4 + Math.random() * 5,
+  }));
+  let frame;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    pieces.forEach(p => {
+      p.y += p.vy; p.x += p.vx; p.rot += p.rotV;
+      if (p.y < canvas.height + 20) alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    if (alive) frame = requestAnimationFrame(draw);
+    else canvas.remove();
+  }
+  draw();
+  setTimeout(() => { cancelAnimationFrame(frame); canvas.remove(); }, 3000);
+}
+
+// ===== Streak =====
+function calcStreak() {
+  const daty = new Set(treningi.map(t => t.data));
+  const today = new Date().toISOString().slice(0, 10);
+  let streak = 0;
+  const d = new Date();
+  // jeśli dziś brak treningu, zacznij od wczoraj
+  if (!daty.has(today)) d.setDate(d.getDate() - 1);
+  for (let i = 0; i < 365; i++) {
+    const iso = d.toISOString().slice(0, 10);
+    if (daty.has(iso)) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  return streak;
+}
+
+// ===== Animowane liczniki =====
+function animateCount(el, target, duration = 700) {
+  if (!el) return;
+  let start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
 
 init();
