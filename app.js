@@ -135,7 +135,9 @@ document.getElementById("login-form").addEventListener("submit", async e => {
 });
 async function init() {
   const { data: { session } } = await db.auth.getSession();
-  if (session) onLogin(); else showView("login");
+  const splash = document.getElementById("view-splash");
+  if (session) { onLogin(); } else { showView("login"); }
+  if (splash) { splash.style.transition = "opacity .3s"; splash.style.opacity = "0"; setTimeout(() => splash.remove(), 320); }
 }
 async function onLogin() {
   showView("app");

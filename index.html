@@ -9,6 +9,13 @@
 </head>
 <body>
 
+  <!-- Ekran ładowania -->
+  <div id="view-splash" style="position:fixed;inset:0;background:#FCFAF7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;">
+    <div style="font-size:28px;font-weight:700;color:#557F69;letter-spacing:-.01em">Dziennik<sup style="color:#F2A98B;font-size:14px">°</sup></div>
+    <div style="width:32px;height:32px;border:3px solid #EAF2ED;border-top-color:#557F69;border-radius:50%;animation:spin .7s linear infinite"></div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
   <!-- Ekran logowania -->
   <div id="view-login" class="login-wrap hidden" style="position:relative;">
     <a href="docs.html" style="position:absolute;top:20px;right:20px;font-size:13px;font-weight:500;color:#557F69;text-decoration:none;opacity:.7;">API docs</a>
