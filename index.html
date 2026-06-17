@@ -9,12 +9,59 @@
 </head>
 <body>
 
+
   <!-- Ekran ładowania -->
-  <div id="view-splash" style="position:fixed;inset:0;background:#FCFAF7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;">
-    <div style="font-size:28px;font-weight:700;color:#557F69;letter-spacing:-.01em">Dziennik<sup style="color:#F2A98B;font-size:14px">°</sup></div>
-    <div style="width:32px;height:32px;border:3px solid #EAF2ED;border-top-color:#557F69;border-radius:50%;animation:spin .7s linear infinite"></div>
+  <div id="view-splash" style="position:fixed;inset:0;background:#FCFAF7;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:48px;">
+      <div style="font-size:34px;font-weight:700;color:#557F69;letter-spacing:-.02em;line-height:1">Dziennik<sup style="color:#F2A98B;font-size:15px">°</sup></div>
+      <div style="font-size:11px;color:#8aab97;letter-spacing:.1em;font-weight:500;text-transform:uppercase">Instruktora</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:0 0 40px;">
+      <div id="splash-quote" style="text-align:center;font-size:13px;color:#8aab97;font-style:italic;margin-bottom:14px;padding:0 32px;min-height:20px;transition:opacity .4s"></div>
+      <div style="height:2px;background:#EAF2ED;position:relative;overflow:hidden;">
+        <div id="splash-bar" style="position:absolute;left:0;top:0;height:100%;width:0%;background:#557F69;transition:width .05s linear;border-radius:2px;"></div>
+      </div>
+    </div>
   </div>
-  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  <style>
+    #splash-quote.fade{opacity:0}
+  </style>
+  <script>
+    (function(){
+      const quotes = [
+        "Koń uczy cierpliwości.",
+        "Każdy trening to krok naprzód.",
+        "Zaufanie buduje się w siodle.",
+        "Dobry instruktor słucha konia i jeźdźca.",
+        "Rytm, równowaga, relaks.",
+        "Koń nie kłamie.",
+        "Praca z koniem to praca nad sobą.",
+      ];
+      let q = 0, pct = 0;
+      const bar = document.getElementById('splash-bar');
+      const quote = document.getElementById('splash-quote');
+
+      function setQuote(text){ quote.textContent = text; quote.style.opacity = 1; }
+      setQuote(quotes[Math.floor(Math.random()*quotes.length)]);
+
+      const iv = setInterval(()=>{
+        pct += 1.4;
+        if(pct >= 100) pct = 100;
+        bar.style.width = pct + '%';
+
+        // zmień cytat co ~25%
+        if(pct % 25 < 1.4 && pct > 10){
+          quote.style.opacity = 0;
+          setTimeout(()=>{
+            q = (q+1) % quotes.length;
+            setQuote(quotes[q]);
+          }, 400);
+        }
+
+        if(pct >= 100) clearInterval(iv);
+      }, 30);
+    })();
+  </script>
 
   <!-- Ekran logowania -->
   <div id="view-login" class="login-wrap hidden" style="position:relative;">
