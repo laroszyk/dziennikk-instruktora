@@ -16,6 +16,7 @@ let typSel = "plac";
 let edycja = null;
 let cwSel = new Set();
 let cwOpen = false;
+let statsAnimated = false;
 const CW_LIMIT = 7;
 
 // ── Custom select ──
@@ -153,6 +154,7 @@ window.logout = async () => {
 
 // ===== Dane z Supabase =====
 async function loadAll() {
+  statsAnimated = false;
   const [jz, kn] = await Promise.all([
     db.from("jezdzcy").select("*").eq("aktywny", true).order("imie"),
     db.from("konie").select("*").order("imie"),
@@ -231,7 +233,8 @@ function renderStart() {
   const dnia = grupy(treningi.filter(t => t.data === selDay));
 
   const streak = calcStreak();
-  const totalTreningi = grupy(treningi).length;
+  const thisMonth = `${dz.getFullYear()}-${String(dz.getMonth()+1).padStart(2,'0')}`;
+  const treningiMiesiaca = grupy(treningi.filter(t => t.data.startsWith(thisMonth))).length;
 
   content().innerHTML = `
     <div class="brandline">
@@ -244,8 +247,8 @@ function renderStart() {
     </div>
     <div class="hello">${fmtD(iso)}</div>
     <div class="stats-row">
-      <div class="stat-box"><div class="stat-num" id="stat-tr">0</div><div class="stat-lbl">treningów</div></div>
-      <div class="stat-box"><div class="stat-num" id="stat-jz">0</div><div class="stat-lbl">jeźdźców</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-tr">${statsAnimated ? treningiMiesiaca : 0}</div><div class="stat-lbl">w tym miesiącu</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-jz">${statsAnimated ? jezdzcy.length : 0}</div><div class="stat-lbl">jeźdźców</div></div>
       <div class="stat-box streak-box"><div class="stat-num">${streak > 0 ? streak + ' 🔥' : '—'}</div><div class="stat-lbl">dni z rzędu</div></div>
     </div>
     <div class="calbox">
@@ -287,8 +290,11 @@ function renderStart() {
           <span class="m">${esc(j.poziom)}</span>
         </div>`).join("")}
     </div>`;
-  animateCount(document.getElementById('stat-tr'), totalTreningi);
-  animateCount(document.getElementById('stat-jz'), jezdzcy.length);
+  if (!statsAnimated) {
+    animateCount(document.getElementById('stat-tr'), treningiMiesiaca);
+    animateCount(document.getElementById('stat-jz'), jezdzcy.length);
+    statsAnimated = true;
+  }
 }
 
 // ===== JEŹDŹCY =====
