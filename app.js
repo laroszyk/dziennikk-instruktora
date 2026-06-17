@@ -863,24 +863,25 @@ const CWALEK_FN_URL = `${SUPABASE_URL}/functions/v1/chat-agent`;
 // ===== Konfetti =====
 function spawnConfetti() {
   const canvas = document.createElement('canvas');
-  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9998';
-  canvas.width = innerWidth; canvas.height = innerHeight;
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d');
-  const colors = ['#557F69','#F2A98B','#B5704C','#8aab97','#EAF2ED','#f7c59f'];
-  const pieces = Array.from({length: 90}, () => ({
+  const colors = ['#557F69','#F2A98B','#B5704C','#8aab97','#f7c59f','#c0dfd1'];
+  const pieces = Array.from({length: 100}, () => ({
     x: Math.random() * canvas.width,
-    y: -10 - Math.random() * 120,
-    r: 4 + Math.random() * 5,
-    vy: 2.5 + Math.random() * 3,
-    vx: (Math.random() - 0.5) * 2,
+    y: -20 - Math.random() * 80,
+    vy: 3 + Math.random() * 4,
+    vx: (Math.random() - 0.5) * 3,
     rot: Math.random() * Math.PI * 2,
-    rotV: (Math.random() - 0.5) * 0.15,
+    rotV: (Math.random() - 0.5) * 0.2,
     color: colors[Math.floor(Math.random() * colors.length)],
-    w: 6 + Math.random() * 8,
-    h: 4 + Math.random() * 5,
+    w: 8 + Math.random() * 8,
+    h: 5 + Math.random() * 5,
   }));
   let frame;
+  const start = Date.now();
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let alive = false;
@@ -891,26 +892,29 @@ function spawnConfetti() {
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rot);
       ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.globalAlpha = Math.max(0, 1 - (Date.now() - start) / 2500);
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
       ctx.restore();
     });
-    if (alive) frame = requestAnimationFrame(draw);
+    if (alive && Date.now() - start < 2600) frame = requestAnimationFrame(draw);
     else canvas.remove();
   }
   draw();
-  setTimeout(() => { cancelAnimationFrame(frame); canvas.remove(); }, 3000);
 }
 
 // ===== Streak =====
+const localISO = (d) => {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
 function calcStreak() {
   const daty = new Set(treningi.map(t => t.data));
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localISO(new Date());
   let streak = 0;
   const d = new Date();
-  // jeśli dziś brak treningu, zacznij od wczoraj
-  if (!daty.has(today)) d.setDate(d.getDate() - 1);
+  if (!daty.has(today)) d.setDate(d.getDate() - 1); // łaska: jeśli dziś brak, licz od wczoraj
   for (let i = 0; i < 365; i++) {
-    const iso = d.toISOString().slice(0, 10);
+    const iso = localISO(d);
     if (daty.has(iso)) { streak++; d.setDate(d.getDate() - 1); }
     else break;
   }
