@@ -788,11 +788,19 @@ const CWALEK_FN_URL = `${SUPABASE_URL}/functions/v1/chat-agent`;
   });
   sendBtn.addEventListener("click", sendMessage);
 
+  function formatMsg(text) {
+    return text
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n- /g, "\n• ")
+      .replace(/^- /g, "• ")
+      .replace(/\n/g, "<br>");
+  }
   function appendMessage(role, text) {
     const div = document.createElement("div");
     div.className = `cwalek-msg cwalek-msg--${role === "user" ? "user" : "bot"}`;
     const p = document.createElement("p");
-    p.textContent = text;
+    p.innerHTML = formatMsg(text);
     div.appendChild(p);
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
