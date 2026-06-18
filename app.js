@@ -504,7 +504,7 @@ window.previewFoto = function(input) {
 window.renderEditKon = function(id) {
   const k = konie.find(k => k.id === id);
   if (!k) return;
-  const typy = ['gorącokrwisty','zimnokrwisty','drobniejszy','uniwersalny','mocniejszy'];
+  const typy = ['gorącokrwisty','zimnokrwisty'];
   content().innerHTML = `
     <button class="btn-back" onclick="go('konie')">← Anuluj</button>
     <h1 class="big">Edytuj: ${esc(k.imie)}</h1>
@@ -520,6 +520,7 @@ window.renderEditKon = function(id) {
     <input class="f" id="ek-foto" type="text" value="${esc(k.foto)}" placeholder="https://..." />
     ${k.foto ? `<img src="${esc(k.foto)}" style="width:100%;border-radius:16px;margin-top:8px;max-height:200px;object-fit:cover" onerror="this.style.display='none'" />` : ''}
     <button class="btn-primary" onclick="zapiszEdycjeKonia('${id}')">Zapisz zmiany</button>`;
+  initCustomSelects();
   window.scrollTo(0, 0);
 };
 
