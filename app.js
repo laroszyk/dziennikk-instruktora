@@ -162,7 +162,7 @@ async function loadAll() {
     db.from("jezdzcy").select("*").eq("aktywny", true).order("imie"),
     db.from("konie").select("*").order("imie"),
   ]);
-  konie = (kn.data || []).map(r => ({ id: r.id, imie: r.imie, typ: r.typ || "uniwersalny", opis: r.charakterystyka || "", foto: r.zdjecie_url || "", fit: r.zdjecie_fit || "cover" }));
+  konie = (kn.data || []).map(r => ({ id: r.id, imie: r.imie, typ: r.typ || "uniwersalny", opis: r.charakterystyka || "", foto: r.zdjecie_url || "", fit: r.zdjecie_fit || "cover", pos: r.zdjecie_pos || "50% 50%" }));
   jezdzcy = (jz.data || []).map(r => ({
     id: r.id, imie: r.imie, poziom: r.poziom || "—", od: r.jezdzi_od || "—",
     umie: r.umiejetnosci || [], poprawa: r.do_poprawy || [], postawa: r.postawa || [],
@@ -455,7 +455,7 @@ function renderKonie() {
     <div class="horse-grid">
       ${konie.map(k => `
         <div class="horse-card">
-          <div class="ph" style="position:relative"><img src="${k.foto}" alt="${esc(k.imie)}" loading="lazy" style="object-fit:${k.fit || 'cover'}" onerror="this.style.display='none'"/>
+          <div class="ph" style="position:relative"><img src="${k.foto}" alt="${esc(k.imie)}" loading="lazy" style="object-fit:${k.fit || 'cover'};object-position:${k.pos || '50% 50%'}" onerror="this.style.display='none'"/>
             <button class="horse-edit-btn" onclick="renderEditKon('${k.id}')" title="Edytuj">✎</button>
           </div>
           <div class="body">
@@ -524,12 +524,24 @@ window.renderEditKon = function(id) {
       <button class="${(k.fit||'cover')==='contain'?'on':''}" onclick="ustawFit(event,'contain')">Fit</button>
       <button class="${(k.fit||'cover')==='fill'?'on':''}" onclick="ustawFit(event,'fill')">Fill</button>
     </div>
-    <div id="ek-foto-preview" style="margin-top:10px;border-radius:16px;overflow:hidden;height:200px;background:var(--sage-mist);${k.foto?'':'display:none'}">
-      <img id="ek-foto-img" src="${esc(k.foto)}" style="width:100%;height:100%;object-fit:${k.fit||'cover'}" onerror="this.parentElement.style.display='none'" />
+    <div id="ek-foto-preview" style="margin-top:10px;border-radius:16px;overflow:hidden;height:200px;background:var(--sage-mist);position:relative;${k.foto?'':'display:none'}">
+      <img id="ek-foto-img" src="${esc(k.foto)}" style="width:100%;height:100%;object-fit:${k.fit||'cover'};object-position:${k.pos||'50% 50%'}" data-pos="${k.pos||'50% 50%'}" onerror="this.parentElement.style.display='none'" />
+      <div id="ek-crop-hint" style="display:${(k.fit||'cover')==='cover'?'flex':'none'};position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;pointer-events:none;gap:5px;align-items:center;white-space:nowrap">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+        Przeciągnij żeby wykadrować
+      </div>
     </div>
     <button class="btn-primary" onclick="zapiszEdycjeKonia('${id}')">Zapisz zmiany</button>`;
   initCustomSelects();
   window.scrollTo(0, 0);
+  setTimeout(() => {
+    const preview = document.getElementById('ek-foto-preview');
+    const img = document.getElementById('ek-foto-img');
+    if (preview && img && (k.fit||'cover') === 'cover') {
+      preview.style.cursor = 'grab';
+      initCropDrag(preview, img);
+    }
+  }, 100);
 };
 
 window.zapiszEdycjeKonia = async (id) => {
@@ -542,7 +554,8 @@ window.zapiszEdycjeKonia = async (id) => {
     typ: document.getElementById("ek-typ").value,
     charakterystyka: document.getElementById("ek-opis").value.trim() || null,
     zdjecie_url: document.getElementById("ek-foto").value.trim() || null,
-    zdjecie_fit: document.querySelector('#ek-fit-seg .on')?.textContent === 'Crop' ? 'cover' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fit' ? 'contain' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fill' ? 'fill' : 'cover'
+    zdjecie_fit: document.querySelector('#ek-fit-seg .on')?.textContent === 'Crop' ? 'cover' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fit' ? 'contain' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fill' ? 'fill' : 'cover',
+    zdjecie_pos: document.getElementById('ek-foto-img')?.dataset?.pos || '50% 50%'
   }).eq("id", id);
   if (error) { alert("Błąd: " + error.message); btn.disabled = false; btn.textContent = "Zapisz zmiany"; return; }
   await loadAll(); go("konie");
@@ -975,16 +988,89 @@ window.ustawFit = function(e, val) {
   document.querySelectorAll('#ek-fit-seg button').forEach(b => b.classList.remove('on'));
   e.currentTarget.classList.add('on');
   const img = document.getElementById('ek-foto-img');
+  const hint = document.getElementById('ek-crop-hint');
+  const preview = document.getElementById('ek-foto-preview');
   if (img) img.style.objectFit = val;
+  if (hint) hint.style.display = val === 'cover' ? 'flex' : 'none';
+  if (preview) {
+    preview.style.cursor = val === 'cover' ? 'grab' : 'default';
+    if (val === 'cover') initCropDrag(preview, img); else removeCropDrag(preview);
+  }
 };
 window.ekFotoLive = function() {
   const url = document.getElementById('ek-foto').value.trim();
   const preview = document.getElementById('ek-foto-preview');
   const img = document.getElementById('ek-foto-img');
   if (!preview || !img) return;
-  if (url) { img.src = url; preview.style.display = 'block'; }
+  if (url) { img.src = url; preview.style.display = 'block'; initCropDragIfCrop(preview, img); }
   else { preview.style.display = 'none'; }
 };
+function initCropDragIfCrop(preview, img) {
+  const isCrop = document.querySelector('#ek-fit-seg .on')?.textContent === 'Crop';
+  if (isCrop) { preview.style.cursor = 'grab'; initCropDrag(preview, img); }
+}
+function removeCropDrag(el) {
+  el._cropDrag = false;
+  el.style.cursor = 'default';
+}
+function initCropDrag(preview, img) {
+  if (preview._cropDrag) return;
+  preview._cropDrag = true;
+  let dragging = false, startX, startY, startPx, startPy;
+  function getPosPercent() {
+    const pos = img.dataset.pos || '50% 50%';
+    const parts = pos.split(' ');
+    return { x: parseFloat(parts[0]), y: parseFloat(parts[1]) };
+  }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  preview.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    const cur = getPosPercent();
+    dragging = true; startX = e.clientX; startY = e.clientY;
+    startPx = cur.x; startPy = cur.y;
+    preview.style.cursor = 'grabbing';
+    const hint = document.getElementById('ek-crop-hint');
+    if (hint) hint.style.display = 'none';
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    const rect = preview.getBoundingClientRect();
+    const dx = (e.clientX - startX) / rect.width * 100;
+    const dy = (e.clientY - startY) / rect.height * 100;
+    const nx = clamp(startPx - dx, 0, 100);
+    const ny = clamp(startPy - dy, 0, 100);
+    const posStr = nx.toFixed(1) + '% ' + ny.toFixed(1) + '%';
+    img.style.objectPosition = posStr;
+    img.dataset.pos = posStr;
+  });
+  document.addEventListener('mouseup', function() {
+    if (!dragging) return;
+    dragging = false;
+    preview.style.cursor = 'grab';
+  });
+  preview.addEventListener('touchstart', function(e) {
+    const t = e.touches[0];
+    const cur = getPosPercent();
+    dragging = true; startX = t.clientX; startY = t.clientY;
+    startPx = cur.x; startPy = cur.y;
+    const hint = document.getElementById('ek-crop-hint');
+    if (hint) hint.style.display = 'none';
+  }, { passive: true });
+  preview.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const rect = preview.getBoundingClientRect();
+    const dx = (t.clientX - startX) / rect.width * 100;
+    const dy = (t.clientY - startY) / rect.height * 100;
+    const nx = clamp(startPx - dx, 0, 100);
+    const ny = clamp(startPy - dy, 0, 100);
+    const posStr = nx.toFixed(1) + '% ' + ny.toFixed(1) + '%';
+    img.style.objectPosition = posStr;
+    img.dataset.pos = posStr;
+  }, { passive: false });
+  preview.addEventListener('touchend', function() { dragging = false; });
+}
 
 
 init();
