@@ -856,6 +856,7 @@ const CWALEK_FN_URL = `${SUPABASE_URL}/functions/v1/chat-agent`;
           messages: chatHistory,
           context: {
             selDay,
+            today: new Date().toISOString().slice(0, 10),
             treningiDnia,
             jezdzcy: jezdzcy.map(j => ({ imie: j.imie, poziom: j.poziom })),
             konie: konie.map(k => ({ imie: k.imie, typ: k.typ })),
