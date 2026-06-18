@@ -135,13 +135,19 @@ async function executeTool(
 
 function buildSystemPrompt(context: {
   selDay: string;
+  today: string;
   treningiDnia: unknown[];
   jezdzcy: unknown[];
   konie: unknown[];
 }): string {
-  const dzienNazwa = new Date(context.selDay).toLocaleDateString("pl-PL", {
+  const dzienNazwa = new Date(context.selDay + 'T12:00:00').toLocaleDateString("pl-PL", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
+  const today = context.today || context.selDay;
+  const todayNazwa = new Date(today + 'T12:00:00').toLocaleDateString("pl-PL", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+  const isHistorical = context.selDay !== today;
 
   return `Jesteś Cwałek — wirtualny asystent stajni. Pomagasz instruktorowi jazdy konnej prowadzić dziennik treningów.
 
@@ -152,7 +158,8 @@ Twój charakter:
 - Gdy potrzebujesz danych spoza bieżącego dnia, używasz dostępnych narzędzi
 - Nie wymyślasz danych — jeśli ich nie masz, mówisz wprost i proponujesz użycie narzędzia
 
-BIEŻĄCY DZIEŃ: ${context.selDay} (${dzienNazwa})
+PRAWDZIWA DZISIEJSZA DATA: ${today} (${todayNazwa})
+WYBRANY DZIEŃ W KALENDARZU: ${context.selDay} (${dzienNazwa})${isHistorical ? ' ← data historyczna, NIE dzisiaj' : ' ← to jest dzisiaj'}
 
 TRENINGI BIEŻĄCEGO DNIA:
 ${context.treningiDnia.length
