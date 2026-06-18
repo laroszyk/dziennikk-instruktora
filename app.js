@@ -162,7 +162,7 @@ async function loadAll() {
     db.from("jezdzcy").select("*").eq("aktywny", true).order("imie"),
     db.from("konie").select("*").order("imie"),
   ]);
-  konie = (kn.data || []).map(r => ({ id: r.id, imie: r.imie, typ: r.typ || "uniwersalny", opis: r.charakterystyka || "", foto: r.zdjecie_url || "" }));
+  konie = (kn.data || []).map(r => ({ id: r.id, imie: r.imie, typ: r.typ || "uniwersalny", opis: r.charakterystyka || "", foto: r.zdjecie_url || "", fit: r.zdjecie_fit || "cover" }));
   jezdzcy = (jz.data || []).map(r => ({
     id: r.id, imie: r.imie, poziom: r.poziom || "—", od: r.jezdzi_od || "—",
     umie: r.umiejetnosci || [], poprawa: r.do_poprawy || [], postawa: r.postawa || [],
@@ -455,7 +455,7 @@ function renderKonie() {
     <div class="horse-grid">
       ${konie.map(k => `
         <div class="horse-card">
-          <div class="ph" style="position:relative"><img src="${k.foto}" alt="${esc(k.imie)}" loading="lazy" onerror="this.style.display='none'"/>
+          <div class="ph" style="position:relative"><img src="${k.foto}" alt="${esc(k.imie)}" loading="lazy" style="object-fit:${k.fit || 'cover'}" onerror="this.style.display='none'"/>
             <button class="horse-edit-btn" onclick="renderEditKon('${k.id}')" title="Edytuj">✎</button>
           </div>
           <div class="body">
@@ -517,8 +517,16 @@ window.renderEditKon = function(id) {
     <label class="f">Charakterystyka</label>
     <textarea class="f" id="ek-opis" rows="3">${esc(k.opis)}</textarea>
     <label class="f">Zdjęcie (URL)</label>
-    <input class="f" id="ek-foto" type="text" value="${esc(k.foto)}" placeholder="https://..." />
-    ${k.foto ? `<img src="${esc(k.foto)}" style="width:100%;border-radius:16px;margin-top:8px;max-height:200px;object-fit:cover" onerror="this.style.display='none'" />` : ''}
+    <input class="f" id="ek-foto" type="text" value="${esc(k.foto)}" placeholder="https://..." oninput="ekFotoLive()" />
+    <label class="f">Tryb wyświetlania zdjęcia</label>
+    <div class="seg" id="ek-fit-seg">
+      <button class="${(k.fit||'cover')==='cover'?'on':''}" onclick="ustawFit(event,'cover')">Crop</button>
+      <button class="${(k.fit||'cover')==='contain'?'on':''}" onclick="ustawFit(event,'contain')">Fit</button>
+      <button class="${(k.fit||'cover')==='fill'?'on':''}" onclick="ustawFit(event,'fill')">Fill</button>
+    </div>
+    <div id="ek-foto-preview" style="margin-top:10px;border-radius:16px;overflow:hidden;height:200px;background:var(--sage-mist);${k.foto?'':'display:none'}">
+      <img id="ek-foto-img" src="${esc(k.foto)}" style="width:100%;height:100%;object-fit:${k.fit||'cover'}" onerror="this.parentElement.style.display='none'" />
+    </div>
     <button class="btn-primary" onclick="zapiszEdycjeKonia('${id}')">Zapisz zmiany</button>`;
   initCustomSelects();
   window.scrollTo(0, 0);
@@ -533,7 +541,8 @@ window.zapiszEdycjeKonia = async (id) => {
     imie,
     typ: document.getElementById("ek-typ").value,
     charakterystyka: document.getElementById("ek-opis").value.trim() || null,
-    zdjecie_url: document.getElementById("ek-foto").value.trim() || null
+    zdjecie_url: document.getElementById("ek-foto").value.trim() || null,
+    zdjecie_fit: document.querySelector('#ek-fit-seg .on')?.textContent === 'Crop' ? 'cover' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fit' ? 'contain' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fill' ? 'fill' : 'cover'
   }).eq("id", id);
   if (error) { alert("Błąd: " + error.message); btn.disabled = false; btn.textContent = "Zapisz zmiany"; return; }
   await loadAll(); go("konie");
@@ -959,5 +968,23 @@ function animateCount(el, target, duration = 700) {
   }
   requestAnimationFrame(step);
 }
+
+// ===== Edycja zdjęcia konia — fit =====
+window.ustawFit = function(e, val) {
+  e.preventDefault();
+  document.querySelectorAll('#ek-fit-seg button').forEach(b => b.classList.remove('on'));
+  e.currentTarget.classList.add('on');
+  const img = document.getElementById('ek-foto-img');
+  if (img) img.style.objectFit = val;
+};
+window.ekFotoLive = function() {
+  const url = document.getElementById('ek-foto').value.trim();
+  const preview = document.getElementById('ek-foto-preview');
+  const img = document.getElementById('ek-foto-img');
+  if (!preview || !img) return;
+  if (url) { img.src = url; preview.style.display = 'block'; }
+  else { preview.style.display = 'none'; }
+};
+
 
 init();
