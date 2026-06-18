@@ -17,6 +17,9 @@ let edycja = null;
 let cwSel = new Set();
 let cwOpen = false;
 let statsAnimated = false;
+let calYear = new Date().getFullYear();
+let calMies = new Date().getMonth();
+let touchStartX = 0;
 const CW_LIMIT = 7;
 
 // ── Custom select ──
@@ -200,11 +203,13 @@ function render() {
 // ===== START =====
 window.toggleMonth = () => { monthOpen = !monthOpen; renderStart(); };
 window.selectDay = (d) => { selDay = d; renderStart(); };
+window.prevMonth = () => { calMies--; if (calMies < 0) { calMies = 11; calYear--; } monthOpen = true; renderStart(); };
+window.nextMonth = () => { calMies++; if (calMies > 11) { calMies = 0; calYear++; } monthOpen = true; renderStart(); };
 
 function renderStart() {
   const dz = new Date();
   const iso = dz.toISOString().slice(0, 10);
-  const rok = dz.getFullYear(), mies = dz.getMonth();
+  const rok = calYear, mies = calMies;
   const cnt = {};
   grupy(treningi).forEach(([g, czl]) => cnt[czl[0].data] = (cnt[czl[0].data] || 0) + 1);
   const dots = (n) => `<span class="dots">${n ? "<i></i>".repeat(Math.min(n, 3)) : ""}</span>`;
@@ -251,9 +256,13 @@ function renderStart() {
       <div class="stat-box"><div class="stat-num" id="stat-jz">${statsAnimated ? jezdzcy.length : 0}</div><div class="stat-lbl">jeźdźców</div></div>
       <div class="stat-box streak-box"><div class="stat-num">${streak > 0 ? streak + ' 🔥' : '—'}</div><div class="stat-lbl">dni z rzędu</div></div>
     </div>
-    <div class="calbox">
+    <div class="calbox" ontouchstart="touchStartX=event.touches[0].clientX" ontouchend="const dx=event.changedTouches[0].clientX-touchStartX;if(dx>50)prevMonth();else if(dx<-50)nextMonth();">
       <div class="c-top">
-        <b>${MIES_N[mies]} ${rok}</b>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="prevMonth()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-strong);padding:0 4px;line-height:1;font-weight:300">&#8249;</button>
+          <b>${MIES_N[mies]} ${rok}</b>
+          <button onclick="nextMonth()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-strong);padding:0 4px;line-height:1;font-weight:300">&#8250;</button>
+        </div>
         <button class="btn-month ${monthOpen ? "open" : ""}" onclick="toggleMonth()">${monthOpen ? "zwiń" : "cały miesiąc"} <span class="chev"></span></button>
       </div>
       ${monthOpen ? month : `<div class="week">${week}</div>`}
