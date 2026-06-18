@@ -44,6 +44,12 @@ const TOOLS = [
   },
 ];
 
+async function hashToken(token: string): Promise<string> {
+  const data = new TextEncoder().encode(token);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 async function executeTool(
   name: string,
   args: Record<string, string>,
@@ -102,9 +108,18 @@ async function authenticate(req: Request, supabase: ReturnType<typeof createClie
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.replace("Bearer ", "").trim();
   if (!token) return false;
+
+  // Sprawdź master key
   const masterKey = Deno.env.get("API_SECRET_KEY");
   if (masterKey && token === masterKey) return true;
-  const { data } = await supabase.from("api_tokens").select("id").eq("token", token).maybeSingle();
+
+  // Sprawdź token przez hash SHA-256
+  const tokenHash = await hashToken(token);
+  const { data } = await supabase
+    .from("api_tokens")
+    .select("id")
+    .eq("token_hash", tokenHash)
+    .maybeSingle();
   return !!data;
 }
 
@@ -130,7 +145,6 @@ Deno.serve(async (req: Request) => {
   const { pytanie, data } = body;
   if (!pytanie) return json({ error: "Pole 'pytanie' jest wymagane." }, 400);
 
-  // Pobierz kontekst dnia
   const dzien = data || new Date().toISOString().slice(0, 10);
 
   const { data: jData } = await supabase.from("jezdzcy").select("id, imie, poziom");
@@ -146,7 +160,7 @@ Deno.serve(async (req: Request) => {
     uwagi: r.uwagi, dobrze: r.dobrze, do_poprawy: r.do_poprawy, ocena: r.ocena,
   }));
 
-  const dzienNazwa = new Date(dzien).toLocaleDateString("pl-PL", {
+  const dzienNazwa = new Date(dzien + "T12:00:00").toLocaleDateString("pl-PL", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
 
