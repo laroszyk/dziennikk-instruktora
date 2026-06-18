@@ -19,6 +19,12 @@ function generateToken(): string {
   return "dziennik_" + Array.from(array).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+async function hashToken(token: string): Promise<string> {
+  const data = new TextEncoder().encode(token);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 function isMaster(req: Request): boolean {
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.replace("Bearer ", "").trim();
@@ -41,9 +47,12 @@ Deno.serve(async (req: Request) => {
     if (!body.name?.trim()) return json({ error: "Pole 'name' jest wymagane." }, 400);
 
     const newToken = generateToken();
+    const tokenHash = await hashToken(newToken);
+    const tokenPrefix = newToken.slice(0, 16);
+
     const { data, error } = await supabase
       .from("api_tokens")
-      .insert({ name: body.name.trim(), token: newToken })
+      .insert({ name: body.name.trim(), token_hash: tokenHash, token_prefix: tokenPrefix })
       .select("id, name, created_at")
       .single();
     if (error) return json({ error: error.message }, 500);
@@ -64,13 +73,13 @@ Deno.serve(async (req: Request) => {
   if (req.method === "GET") {
     const { data, error } = await supabase
       .from("api_tokens")
-      .select("id, name, token, created_at")
+      .select("id, name, token_prefix, created_at")
       .order("created_at", { ascending: false });
     if (error) return json({ error: error.message }, 500);
-    const masked = (data || []).map((t: { id: string; name: string; token: string; created_at: string }) => ({
+    const masked = (data || []).map((t: { id: string; name: string; token_prefix: string; created_at: string }) => ({
       id: t.id,
       name: t.name,
-      token_preview: t.token.slice(0, 16) + "••••••••" + t.token.slice(-6),
+      token_preview: t.token_prefix + "••••••••",
       created_at: t.created_at,
     }));
     return json({ tokens: masked });
