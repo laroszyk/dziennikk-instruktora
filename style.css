@@ -384,6 +384,19 @@ input.f:focus,select.f:focus,textarea.f:focus{outline:none;border-color:var(--sa
 #cwalek-send svg { width: 16px; height: 16px; stroke: #fff; }
 #cwalek-send:disabled { background: var(--hair); }
 
+/* ===== Tryb ciemny ===== */
+body.dark-mode {
+  --bg:#1C1F1D; --card:#252928; --ink:#D4D8D4; --ink-strong:#F0F2F0;
+  --hair:#2E3330; --muted:#6B7068; --sage-mist:#1E2B24; --sand-mist:#252218;
+  --peach-mist:#2A2019; --shadow:0 4px 20px rgba(0,0,0,.25);
+  --shadow-lg:0 10px 34px rgba(0,0,0,.4);
+}
+body.dark-mode .konto-panel__sheet,
+body.dark-mode .agent-modal,
+body.dark-mode .cwalek-panel { background: var(--card); }
+body.dark-mode .ust-card { background: #1E2220; border-color: var(--hair); }
+body.dark-mode input.f, body.dark-mode select.f, body.dark-mode textarea.f { background:#1C1F1D; color:var(--ink); border-color:var(--hair); }
+
 /* ===== Panel konta ===== */
 .konto-panel {
   position: fixed; inset: 0; z-index: 3000;
@@ -427,17 +440,98 @@ input.f:focus,select.f:focus,textarea.f:focus{outline:none;border-color:var(--sa
 .konto-panel__name { font-size: 14px; font-weight: 700; color: var(--ink-strong); }
 .konto-panel__email { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 1px; }
 .konto-panel__footer {
-  display: flex; gap: 10px; padding: 16px 20px 0;
-  border-top: 1px solid var(--hair); margin-top: 8px;
+  padding: 16px 16px 0; border-top: 1px solid var(--hair); margin-top: 12px;
 }
-.konto-panel__close-x, .konto-panel__logout {
-  flex: 1; padding: 11px; border-radius: 14px; border: 1.5px solid var(--hair);
-  background: #fff; color: var(--ink); font-family: inherit;
-  font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s;
+.konto-panel__logout {
+  width: 100%; padding: 13px; border-radius: 14px; border: 1.5px solid #f0dbd8;
+  background: #fff9f8; color: #B5503F; font-family: inherit;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s;
 }
-.konto-panel__close-x:hover, .konto-panel__logout:hover { background: var(--hair); }
-.konto-panel__logout { color: #B5503F; border-color: #f0dbd8; background: #fff9f8; }
 .konto-panel__logout:hover { background: #fdecea; }
+
+/* ===== Ustawienia — sekcje ===== */
+.konto-panel__title-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 20px 12px;
+}
+.konto-panel__title { font-size: 18px; font-weight: 700; color: var(--ink-strong); }
+.konto-panel__close-x {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--hair);
+  border: none; cursor: pointer; font-size: 13px; color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+}
+.ust-section-title {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .09em;
+  padding: 14px 20px 6px;
+}
+.ust-card {
+  background: #fff; border: 1px solid var(--hair); border-radius: 18px;
+  margin: 0 16px 4px; overflow: hidden;
+}
+.ust-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; border-bottom: 1px solid var(--hair); cursor: pointer;
+  transition: background .12s;
+}
+.ust-row:last-child { border-bottom: none; }
+.ust-row:hover { background: var(--sage-mist); }
+.ust-row__icon { font-size: 17px; flex: none; }
+.ust-row__label { flex: 1; font-size: 14px; font-weight: 500; color: var(--ink); }
+.ust-row__arrow { font-size: 18px; color: var(--muted); font-weight: 300; }
+.ust-row__value { font-size: 13px; color: var(--muted); font-weight: 500; }
+.ust-select {
+  border: none; background: transparent; font-family: inherit;
+  font-size: 13px; font-weight: 600; color: var(--sage-deep); cursor: pointer;
+  outline: none; padding: 2px 4px;
+}
+
+/* Awatar */
+.ust-avatar-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-bottom: 1px solid var(--hair);
+}
+.ust-avatar-preview {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--sage-mist); color: var(--sage-deep);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; flex: none;
+  transition: background .2s, color .2s;
+}
+.ust-avatar-colors { display: flex; gap: 8px; flex-wrap: wrap; }
+.ust-color-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 3px solid transparent;
+  cursor: pointer; transition: transform .15s, border-color .15s;
+}
+.ust-color-btn:hover { transform: scale(1.15); border-color: rgba(255,255,255,.6); }
+
+/* Formularz hasła */
+.ust-subform {
+  padding: 12px 16px; border-bottom: 1px solid var(--hair);
+  background: var(--sage-mist);
+}
+.ust-subform .f { margin-bottom: 8px; }
+
+/* Toggles */
+.ust-toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 13px 16px; border-bottom: 1px solid var(--hair);
+}
+.ust-toggle-row:last-child { border-bottom: none; }
+.ust-toggle-label { font-size: 14px; font-weight: 500; color: var(--ink); }
+.ust-toggle-sub { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.ust-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex: none; }
+.ust-switch input { opacity: 0; width: 0; height: 0; }
+.ust-slider {
+  position: absolute; inset: 0; background: var(--hair); border-radius: 24px; cursor: pointer;
+  transition: background .2s;
+}
+.ust-slider::before {
+  content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px;
+  background: #fff; border-radius: 50%; transition: transform .2s;
+}
+.ust-switch input:checked + .ust-slider { background: var(--sage); }
+.ust-switch input:checked + .ust-slider::before { transform: translateX(20px); }
 
 /* Konto — karty agentów */
 .konto-agent {

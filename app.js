@@ -152,12 +152,16 @@ async function onLogin() {
   await loadSubscriptions();
   // Obsługa powrotu z Stripe Checkout
   const params = new URLSearchParams(window.location.search);
+  // Ciemny motyw
+  if (localStorage.getItem("darkMode") === "1") document.body.classList.add("dark-mode");
+
   if (params.get("payment") === "success") {
     history.replaceState({}, "", window.location.pathname);
-    go("agenci");
+    openKontoPanel();
   } else {
     if (params.has("payment")) history.replaceState({}, "", window.location.pathname);
-    go("start");
+    const defScreen = localStorage.getItem("defaultScreen") || "start";
+    go(defScreen);
   }
 }
 
@@ -1104,10 +1108,13 @@ window.openKontoPanel = async () => {
   panel.classList.remove("hidden");
   requestAnimationFrame(() => panel.classList.add("konto-panel--open"));
 
-  // Pokaż email
+  // Email użytkownika
   const { data: { user } } = await db.auth.getUser();
-  const emailEl = document.getElementById("konto-email");
+  const emailEl = document.getElementById("ust-email-label");
   if (emailEl && user?.email) emailEl.textContent = user.email;
+
+  // Załaduj ustawienia z localStorage
+  loadUstawienia();
 
   // Odśwież subskrypcje i renderuj agentów
   await loadSubscriptions();
@@ -1140,6 +1147,83 @@ function renderKontoAgenci() {
       </div>`;
   }).join("");
 }
+
+// ===== USTAWIENIA =====
+function loadUstawienia() {
+  // Awatar
+  const ac = localStorage.getItem("avatarColor") || "#557F69";
+  const ab = localStorage.getItem("avatarBg") || "#EAF2ED";
+  applyAvatarColor(ac, ab);
+
+  // Powiadomienia
+  ["notif-trening","notif-tydzien","notif-brak"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = localStorage.getItem(id) === "1";
+  });
+
+  // Aplikacja
+  const dark = localStorage.getItem("darkMode") === "1";
+  const darkEl = document.getElementById("app-dark");
+  if (darkEl) darkEl.checked = dark;
+  if (dark) document.body.classList.add("dark-mode");
+
+  const defScreen = localStorage.getItem("defaultScreen") || "start";
+  const sel = document.getElementById("app-default-screen");
+  if (sel) sel.value = defScreen;
+}
+
+window.setAvatarColor = (color, bg) => {
+  localStorage.setItem("avatarColor", color);
+  localStorage.setItem("avatarBg", bg);
+  applyAvatarColor(color, bg);
+};
+
+function applyAvatarColor(color, bg) {
+  document.querySelectorAll(".me").forEach(el => {
+    el.style.background = bg;
+    el.style.color = color;
+  });
+  const prev = document.getElementById("ust-avatar-preview");
+  if (prev) { prev.style.background = bg; prev.style.color = color; }
+}
+
+window.toggleHaslo = () => {
+  const form = document.getElementById("haslo-form");
+  const arrow = document.getElementById("haslo-arrow");
+  const open = form.classList.toggle("hidden");
+  if (arrow) arrow.textContent = open ? "›" : "‹";
+};
+
+window.zapiszHaslo = async () => {
+  const nowe = document.getElementById("haslo-nowe").value;
+  const potw = document.getElementById("haslo-potw").value;
+  const msg = document.getElementById("haslo-msg");
+  if (nowe.length < 6) { msg.textContent = "Hasło musi mieć min. 6 znaków."; msg.style.color = "#B5503F"; return; }
+  if (nowe !== potw) { msg.textContent = "Hasła nie są identyczne."; msg.style.color = "#B5503F"; return; }
+  msg.textContent = "Zapisywanie…"; msg.style.color = "var(--muted)";
+  const { error } = await db.auth.updateUser({ password: nowe });
+  if (error) { msg.textContent = "Błąd: " + error.message; msg.style.color = "#B5503F"; }
+  else { msg.textContent = "✓ Hasło zmienione!"; msg.style.color = "var(--sage-deep)"; document.getElementById("haslo-nowe").value = ""; document.getElementById("haslo-potw").value = ""; }
+};
+
+window.saveNotifSettings = () => {
+  ["notif-trening","notif-tydzien","notif-brak"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) localStorage.setItem(id, el.checked ? "1" : "0");
+  });
+};
+
+window.toggleDarkMode = () => {
+  const el = document.getElementById("app-dark");
+  const on = el?.checked;
+  document.body.classList.toggle("dark-mode", on);
+  localStorage.setItem("darkMode", on ? "1" : "0");
+};
+
+window.saveAppSettings = () => {
+  const sel = document.getElementById("app-default-screen");
+  if (sel) localStorage.setItem("defaultScreen", sel.value);
+};
 
 // ===== AGENCI =====
 const AGENCI_CONFIG = [

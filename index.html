@@ -99,30 +99,104 @@
       <svg viewBox="0 0 24 24"><path d="M5 4h14v17H5z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></button>
   </nav>
 
-  <!-- Panel konta (LU) -->
+  <!-- Panel ustawień -->
   <div id="konto-panel" class="konto-panel hidden" role="dialog">
     <div class="konto-panel__backdrop" onclick="closeKontoPanel()"></div>
     <div class="konto-panel__sheet">
-      <!-- Uchwyt -->
       <div class="konto-panel__handle"></div>
+      <div class="konto-panel__title-row">
+        <span class="konto-panel__title">Ustawienia</span>
+        <button class="konto-panel__close-x" onclick="closeKontoPanel()">✕</button>
+      </div>
 
-      <!-- Agenci — na samej górze -->
-      <div class="konto-panel__section-title" style="padding-top:14px">✨ Agenci AI</div>
+      <!-- 1. AGENCI -->
+      <div class="ust-section-title">✨ Agenci AI</div>
       <div id="konto-agenci"></div>
 
-      <!-- Konto -->
-      <div class="konto-panel__section-title" style="margin-top:8px">Konto</div>
-      <div class="konto-panel__account">
-        <div class="konto-panel__avatar">LU</div>
-        <div>
-          <div class="konto-panel__name">Lui</div>
-          <div class="konto-panel__email" id="konto-email">instruktor</div>
+      <!-- 2. PROFIL -->
+      <div class="ust-section-title">👤 Profil i awatar</div>
+      <div class="ust-card">
+        <div class="ust-avatar-row">
+          <div class="ust-avatar-preview" id="ust-avatar-preview">LU</div>
+          <div class="ust-avatar-colors" id="ust-avatar-colors">
+            <button class="ust-color-btn" style="background:#557F69" onclick="setAvatarColor('#557F69','#EAF2ED')" title="Szałwia"></button>
+            <button class="ust-color-btn" style="background:#B5704C" onclick="setAvatarColor('#B5704C','#FBEFE6')" title="Brzoskwinia"></button>
+            <button class="ust-color-btn" style="background:#5D8590" onclick="setAvatarColor('#5D8590','#EAF1F2')" title="Niebieska"></button>
+            <button class="ust-color-btn" style="background:#8A7B99" onclick="setAvatarColor('#8A7B99','#F1EDF4')" title="Liliowa"></button>
+            <button class="ust-color-btn" style="background:#A1834C" onclick="setAvatarColor('#A1834C','#F7F1E8')" title="Złota"></button>
+          </div>
+        </div>
+        <div class="ust-row" onclick="toggleHaslo()">
+          <div class="ust-row__icon">🔑</div>
+          <div class="ust-row__label">Zmień hasło</div>
+          <div class="ust-row__arrow" id="haslo-arrow">›</div>
+        </div>
+        <div id="haslo-form" class="ust-subform hidden">
+          <input class="f" id="haslo-nowe" type="password" placeholder="Nowe hasło (min. 6 znaków)" autocomplete="new-password"/>
+          <input class="f" id="haslo-potw" type="password" placeholder="Powtórz nowe hasło" autocomplete="new-password"/>
+          <button class="btn-sm" onclick="zapiszHaslo()" style="margin-top:4px;width:100%">Zapisz nowe hasło</button>
+          <p id="haslo-msg" style="font-size:12px;margin-top:6px;text-align:center"></p>
+        </div>
+        <div class="ust-row" id="ust-email-row">
+          <div class="ust-row__icon">📧</div>
+          <div class="ust-row__label" id="ust-email-label">Ładowanie…</div>
         </div>
       </div>
 
-      <!-- Stopka -->
+      <!-- 3. POWIADOMIENIA -->
+      <div class="ust-section-title">🔔 Powiadomienia</div>
+      <div class="ust-card">
+        <div class="ust-toggle-row">
+          <div>
+            <div class="ust-toggle-label">Przypomnienie o treningu</div>
+            <div class="ust-toggle-sub">Powiadomienie rano w dniu zaplanowanego treningu</div>
+          </div>
+          <label class="ust-switch"><input type="checkbox" id="notif-trening" onchange="saveNotifSettings()"><span class="ust-slider"></span></label>
+        </div>
+        <div class="ust-toggle-row">
+          <div>
+            <div class="ust-toggle-label">Tygodniowe podsumowanie</div>
+            <div class="ust-toggle-sub">Skrót aktywności w niedzielę wieczór</div>
+          </div>
+          <label class="ust-switch"><input type="checkbox" id="notif-tydzien" onchange="saveNotifSettings()"><span class="ust-slider"></span></label>
+        </div>
+        <div class="ust-toggle-row">
+          <div>
+            <div class="ust-toggle-label">Brak treningów — alert</div>
+            <div class="ust-toggle-sub">Przypomnienie gdy minęło 7+ dni bez wpisu</div>
+          </div>
+          <label class="ust-switch"><input type="checkbox" id="notif-brak" onchange="saveNotifSettings()"><span class="ust-slider"></span></label>
+        </div>
+      </div>
+
+      <!-- 4. APLIKACJA -->
+      <div class="ust-section-title">⚙️ Aplikacja</div>
+      <div class="ust-card">
+        <div class="ust-toggle-row">
+          <div>
+            <div class="ust-toggle-label">Tryb ciemny</div>
+            <div class="ust-toggle-sub">Ciemne tło aplikacji</div>
+          </div>
+          <label class="ust-switch"><input type="checkbox" id="app-dark" onchange="toggleDarkMode()"><span class="ust-slider"></span></label>
+        </div>
+        <div class="ust-row">
+          <div class="ust-row__icon">🏠</div>
+          <div class="ust-row__label">Widok startowy</div>
+          <select class="ust-select" id="app-default-screen" onchange="saveAppSettings()">
+            <option value="start">Start</option>
+            <option value="treningi">Treningi</option>
+            <option value="jezdzcy">Jeźdźcy</option>
+          </select>
+        </div>
+        <div class="ust-row">
+          <div class="ust-row__icon">📱</div>
+          <div class="ust-row__label">Wersja aplikacji</div>
+          <div class="ust-row__value">1.0.0</div>
+        </div>
+      </div>
+
+      <!-- STOPKA -->
       <div class="konto-panel__footer">
-        <button class="konto-panel__close-x" onclick="closeKontoPanel()">✕ Zamknij</button>
         <button class="konto-panel__logout" onclick="logout()">Wyloguj się</button>
       </div>
     </div>
