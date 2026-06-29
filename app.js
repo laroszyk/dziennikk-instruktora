@@ -221,7 +221,7 @@ function go(s) {
 }
 window.go = go;
 function render() {
-  ({ start: renderStart, jezdzcy: () => renderJezdzcy(""), konie: renderKonie, treningi: renderTreningi, agenci: renderAgenci })[screen]?.();
+  ({ start: renderStart, jezdzcy: () => renderJezdzcy(""), konie: renderKonie, treningi: renderTreningi })[screen]?.();
 }
 
 // ===== START =====
@@ -271,7 +271,7 @@ function renderStart() {
       <div class="right">
         <button class="iconbtn" onclick="go('jezdzcy')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
         <a class="iconbtn" href="docs.html" title="API Docs" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:inherit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></a>
-        <button class="me" onclick="logout()" title="Wyloguj">LU</button>
+        <button class="me" onclick="openKontoPanel()" title="Konto">LU</button>
       </div>
     </div>
     <div class="hello">${fmtD(iso)}</div>
@@ -1097,6 +1097,49 @@ function initCropDrag(preview, img) {
 }
 
 
+// ===== PANEL KONTA =====
+window.openKontoPanel = async () => {
+  const panel = document.getElementById("konto-panel");
+  panel.classList.remove("hidden");
+  requestAnimationFrame(() => panel.classList.add("konto-panel--open"));
+
+  // Pokaż email
+  const { data: { user } } = await db.auth.getUser();
+  const emailEl = document.getElementById("konto-email");
+  if (emailEl && user?.email) emailEl.textContent = user.email;
+
+  // Odśwież subskrypcje i renderuj agentów
+  await loadSubscriptions();
+  renderKontoAgenci();
+};
+
+window.closeKontoPanel = () => {
+  const panel = document.getElementById("konto-panel");
+  panel.classList.remove("konto-panel--open");
+  setTimeout(() => panel.classList.add("hidden"), 280);
+};
+
+function renderKontoAgenci() {
+  const el = document.getElementById("konto-agenci");
+  if (!el) return;
+  el.innerHTML = AGENCI_CONFIG.map(a => {
+    const active = userSubscriptions.includes(a.id);
+    return `
+      <div class="konto-agent ${active ? "konto-agent--active" : ""}">
+        <div class="konto-agent__left">
+          <span class="konto-agent__emoji">${a.emoji}</span>
+          <div>
+            <div class="konto-agent__name">${a.nazwa}</div>
+            <div class="konto-agent__cena">${active ? "✓ aktywny" : a.cena}</div>
+          </div>
+        </div>
+        ${active
+          ? `<button class="konto-agent__btn konto-agent__btn--open" onclick="closeKontoPanel();openAgentChat('${a.id}')">Otwórz</button>`
+          : `<button class="konto-agent__btn konto-agent__btn--buy" onclick="subscribeAgent('${a.id}')">Kup</button>`}
+      </div>`;
+  }).join("");
+}
+
 // ===== AGENCI =====
 const AGENCI_CONFIG = [
   {
@@ -1136,7 +1179,7 @@ function renderAgenci() {
     <div class="brandline">
       <span class="logo" style="font-size:21px;color:var(--ink-strong)">Agenci AI</span>
       <div class="right">
-        <button class="me" onclick="logout()" title="Wyloguj">LU</button>
+        <button class="me" onclick="openKontoPanel()" title="Konto">LU</button>
       </div>
     </div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:20px;font-weight:500">Specjalistyczni asystenci AI dla Twojej stajni</p>

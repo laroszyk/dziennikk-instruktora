@@ -97,9 +97,27 @@
       <img src="ikona koń.png" width="22" height="22" alt="Konie" class="tab-icon-img" style="display:block;"></button>
     <button class="tab" data-screen="treningi" title="Treningi">
       <svg viewBox="0 0 24 24"><path d="M5 4h14v17H5z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></button>
-    <button class="tab" data-screen="agenci" title="Agenci AI">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l1.5 4.5H18l-3.75 2.75 1.5 4.5L12 11l-3.75 2.75 1.5-4.5L6 6.5h4.5z"/><circle cx="12" cy="18" r="3"/><path d="M9 15l-3 3M15 15l3 3"/></svg></button>
   </nav>
+
+  <!-- Panel konta (LU) -->
+  <div id="konto-panel" class="konto-panel hidden" role="dialog">
+    <div class="konto-panel__backdrop" onclick="closeKontoPanel()"></div>
+    <div class="konto-panel__sheet">
+      <div class="konto-panel__header">
+        <div class="konto-panel__avatar">LU</div>
+        <div>
+          <div class="konto-panel__name">Lui</div>
+          <div class="konto-panel__email" id="konto-email">instruktor</div>
+        </div>
+        <button class="konto-panel__close" onclick="closeKontoPanel()">✕</button>
+      </div>
+      <div class="konto-panel__section-title">Agenci AI</div>
+      <div id="konto-agenci"></div>
+      <div class="konto-panel__footer">
+        <button class="konto-panel__logout" onclick="logout()">Wyloguj się</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Cwałek: pływający przycisk czatu -->
   <button id="cwalek-btn" title="Porozmawiaj z Cwałkiem" aria-label="Otwórz czat z Cwałkiem"><img src="horse-icon.svg" width="28" height="28" alt="Cwałek" style="display:block;filter:brightness(0) invert(1);"></button>

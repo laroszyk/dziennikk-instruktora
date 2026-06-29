@@ -384,6 +384,79 @@ input.f:focus,select.f:focus,textarea.f:focus{outline:none;border-color:var(--sa
 #cwalek-send svg { width: 16px; height: 16px; stroke: #fff; }
 #cwalek-send:disabled { background: var(--hair); }
 
+/* ===== Panel konta ===== */
+.konto-panel {
+  position: fixed; inset: 0; z-index: 3000;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.konto-panel.hidden { display: none; }
+.konto-panel__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(40,50,43,.35); backdrop-filter: blur(2px);
+  opacity: 0; transition: opacity .28s;
+}
+.konto-panel--open .konto-panel__backdrop { opacity: 1; }
+.konto-panel__sheet {
+  position: relative; background: var(--bg);
+  border-radius: 24px 24px 0 0; padding: 0 0 32px;
+  transform: translateY(100%); transition: transform .28s cubic-bezier(.4,0,.2,1);
+  max-height: 85vh; overflow-y: auto;
+}
+.konto-panel--open .konto-panel__sheet { transform: translateY(0); }
+.konto-panel__header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 20px 16px; border-bottom: 1px solid var(--hair);
+}
+.konto-panel__avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--sage-mist); color: var(--sage-deep);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; flex: none;
+}
+.konto-panel__name { font-size: 15px; font-weight: 700; color: var(--ink-strong); }
+.konto-panel__email { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+.konto-panel__close {
+  margin-left: auto; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--hair); border: none; cursor: pointer; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; color: var(--ink);
+}
+.konto-panel__section-title {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .09em;
+  padding: 16px 20px 8px;
+}
+.konto-panel__footer {
+  padding: 16px 20px 0; border-top: 1px solid var(--hair); margin-top: 8px;
+}
+.konto-panel__logout {
+  width: 100%; padding: 12px; border-radius: 14px; border: 1.5px solid var(--hair);
+  background: #fff; color: var(--ink); font-family: inherit;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s;
+}
+.konto-panel__logout:hover { background: var(--hair); }
+
+/* Konto — karty agentów */
+.konto-agent {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-bottom: 1px solid var(--hair);
+  gap: 12px;
+}
+.konto-agent--active { background: var(--sage-mist); }
+.konto-agent__left { display: flex; align-items: center; gap: 10px; }
+.konto-agent__emoji { font-size: 22px; flex: none; }
+.konto-agent__name { font-size: 14px; font-weight: 600; color: var(--ink-strong); }
+.konto-agent__cena { font-size: 11px; font-weight: 500; color: var(--muted); margin-top: 1px; }
+.konto-agent--active .konto-agent__cena { color: var(--sage-deep); }
+.konto-agent__btn {
+  padding: 7px 14px; border-radius: 10px; border: none; font-family: inherit;
+  font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; flex: none;
+  transition: opacity .15s;
+}
+.konto-agent__btn--buy { background: var(--ink-strong); color: #fff; }
+.konto-agent__btn--buy:hover { opacity: .82; }
+.konto-agent__btn--open { background: var(--sage); color: #fff; }
+.konto-agent__btn--open:hover { opacity: .82; }
+
 /* ===== Agenci ===== */
 .agent-card {
   background: #fff; border: 1.5px solid var(--hair); border-radius: 20px;
