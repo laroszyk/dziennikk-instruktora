@@ -68,14 +68,29 @@
     <a href="docs.html" style="position:absolute;top:20px;right:20px;font-size:13px;font-weight:500;color:#557F69;text-decoration:none;opacity:.7;">API docs</a>
     <div class="login-card">
       <h1>Dziennik<sup>°</sup></h1>
-      <p class="subtitle">Twoi jeźdźcy, konie i treningi w jednym miejscu</p>
+      <p class="subtitle" id="auth-subtitle">Twoi jeźdźcy, konie i treningi w jednym miejscu</p>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab auth-tab--active" id="tab-login" onclick="switchAuthMode('login')">Zaloguj się</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthMode('register')">Utwórz konto</button>
+      </div>
+
       <form id="login-form">
         <label class="f">E-mail</label>
         <input class="f" id="email" type="email" autocomplete="email" required />
         <label class="f">Hasło</label>
         <input class="f" id="password" type="password" autocomplete="current-password" required />
-        <button type="submit" class="btn-primary">Zaloguj się</button>
+
+        <!-- Pole tylko przy rejestracji -->
+        <div id="register-fields" class="register-fields hidden">
+          <label class="f">Powtórz hasło</label>
+          <input class="f" id="password2" type="password" autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn-primary" id="auth-submit-btn">Zaloguj się</button>
         <p id="login-error" class="error hidden"></p>
+        <p id="login-success" class="auth-success hidden"></p>
       </form>
     </div>
   </div>

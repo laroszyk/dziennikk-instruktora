@@ -127,16 +127,75 @@ function showView(v) {
   viewApp.classList.toggle("hidden", v !== "app");
   tabbar.classList.toggle("hidden", v !== "app");
 }
+let _authMode = "login"; // "login" | "register"
+
+window.switchAuthMode = (mode) => {
+  _authMode = mode;
+  const isReg = mode === "register";
+  document.getElementById("tab-login").classList.toggle("auth-tab--active", !isReg);
+  document.getElementById("tab-register").classList.toggle("auth-tab--active", isReg);
+  document.getElementById("register-fields").classList.toggle("hidden", !isReg);
+  document.getElementById("auth-submit-btn").textContent = isReg ? "Utwórz konto" : "Zaloguj się";
+  document.getElementById("auth-subtitle").textContent = isReg
+    ? "Załóż konto i zacznij prowadzić dziennik" : "Twoi jeźdźcy, konie i treningi w jednym miejscu";
+  document.getElementById("login-error").classList.add("hidden");
+  document.getElementById("login-success").classList.add("hidden");
+  if (isReg) {
+    document.getElementById("password").autocomplete = "new-password";
+  } else {
+    document.getElementById("password").autocomplete = "current-password";
+    document.getElementById("password2").value = "";
+  }
+};
+
 document.getElementById("login-form").addEventListener("submit", async e => {
   e.preventDefault();
   const err = document.getElementById("login-error");
+  const suc = document.getElementById("login-success");
+  const btn = document.getElementById("auth-submit-btn");
   err.classList.add("hidden");
-  const { error } = await db.auth.signInWithPassword({
-    email: document.getElementById("email").value.trim(),
-    password: document.getElementById("password").value,
-  });
-  if (error) { err.textContent = "Nieprawidłowy e-mail lub hasło."; err.classList.remove("hidden"); return; }
-  onLogin();
+  suc.classList.add("hidden");
+
+  const email = document.getElementById("email").value.trim();
+  const pass  = document.getElementById("password").value;
+
+  btn.disabled = true;
+  btn.textContent = "Chwileczkę…";
+
+  if (_authMode === "register") {
+    const pass2 = document.getElementById("password2").value;
+    if (pass.length < 6) {
+      err.textContent = "Hasło musi mieć co najmniej 6 znaków.";
+      err.classList.remove("hidden");
+      btn.disabled = false; btn.textContent = "Utwórz konto"; return;
+    }
+    if (pass !== pass2) {
+      err.textContent = "Hasła nie są identyczne.";
+      err.classList.remove("hidden");
+      btn.disabled = false; btn.textContent = "Utwórz konto"; return;
+    }
+    const { error } = await db.auth.signUp({ email, password: pass });
+    btn.disabled = false; btn.textContent = "Utwórz konto";
+    if (error) {
+      err.textContent = error.message === "User already registered"
+        ? "Ten e-mail jest już zarejestrowany. Zaloguj się."
+        : error.message;
+      err.classList.remove("hidden");
+    } else {
+      suc.textContent = "✓ Konto utworzone! Możesz się teraz zalogować.";
+      suc.classList.remove("hidden");
+      switchAuthMode("login");
+      document.getElementById("password").value = "";
+    }
+  } else {
+    const { error } = await db.auth.signInWithPassword({ email, password: pass });
+    btn.disabled = false; btn.textContent = "Zaloguj się";
+    if (error) {
+      err.textContent = "Nieprawidłowy e-mail lub hasło.";
+      err.classList.remove("hidden"); return;
+    }
+    onLogin();
+  }
 });
 async function init() {
   const { data: { session } } = await db.auth.getSession();

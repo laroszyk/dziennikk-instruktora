@@ -34,7 +34,13 @@ button{font-family:inherit;cursor:pointer}
   padding:34px 28px;width:100%;max-width:380px}
 .login-card h1{font-size:26px;font-weight:700;color:var(--sage-deep)}
 .login-card h1 sup{color:var(--peach-2);font-size:14px}
-.login-card .subtitle{font-size:13px;color:var(--muted);font-weight:500;margin:4px 0 18px}
+.login-card .subtitle{font-size:13px;color:var(--muted);font-weight:500;margin:4px 0 14px;transition:color .2s}
+/* Auth tabs */
+.auth-tabs{display:flex;background:var(--hair);border-radius:14px;padding:3px;gap:2px;margin-bottom:18px}
+.auth-tab{flex:1;border:none;background:transparent;border-radius:11px;padding:8px 0;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:background .18s,color .18s;font-family:inherit}
+.auth-tab--active{background:#fff;color:var(--sage-deep);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.register-fields{animation:pop .2s ease}
+.auth-success{color:var(--sage-deep);font-size:13px;font-weight:600;margin-top:10px;text-align:center}
 .error{color:#B5503F;font-size:13px;font-weight:600;margin-top:10px;text-align:center}
 
 /* ===== Nagłówek ===== */
