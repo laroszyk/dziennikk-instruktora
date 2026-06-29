@@ -103,17 +103,26 @@
   <div id="konto-panel" class="konto-panel hidden" role="dialog">
     <div class="konto-panel__backdrop" onclick="closeKontoPanel()"></div>
     <div class="konto-panel__sheet">
-      <div class="konto-panel__header">
+      <!-- Uchwyt -->
+      <div class="konto-panel__handle"></div>
+
+      <!-- Agenci — na samej górze -->
+      <div class="konto-panel__section-title" style="padding-top:14px">✨ Agenci AI</div>
+      <div id="konto-agenci"></div>
+
+      <!-- Konto -->
+      <div class="konto-panel__section-title" style="margin-top:8px">Konto</div>
+      <div class="konto-panel__account">
         <div class="konto-panel__avatar">LU</div>
         <div>
           <div class="konto-panel__name">Lui</div>
           <div class="konto-panel__email" id="konto-email">instruktor</div>
         </div>
-        <button class="konto-panel__close" onclick="closeKontoPanel()">✕</button>
       </div>
-      <div class="konto-panel__section-title">Agenci AI</div>
-      <div id="konto-agenci"></div>
+
+      <!-- Stopka -->
       <div class="konto-panel__footer">
+        <button class="konto-panel__close-x" onclick="closeKontoPanel()">✕ Zamknij</button>
         <button class="konto-panel__logout" onclick="logout()">Wyloguj się</button>
       </div>
     </div>
