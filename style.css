@@ -47,6 +47,10 @@ button{font-family:inherit;cursor:pointer}
   display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s}
 .brandline .iconbtn:hover{background:var(--sage-mist);border-color:var(--sage);box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .brandline .iconbtn svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round}
+/* Ikona AI — sparkle w kolorze brzoskwini */
+.brandline .iconbtn--ai{background:var(--peach-mist);border-color:var(--peach-1)}
+.brandline .iconbtn--ai svg{stroke:var(--peach-2)}
+.brandline .iconbtn--ai:hover{background:var(--peach-1);border-color:var(--peach-2)}
 .hello{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:14px}
 .hello b{color:var(--ink);font-weight:600}
 h1.big{font-size:21px;font-weight:700;margin:4px 0 14px;letter-spacing:-.01em;color:var(--ink-strong)}
@@ -383,6 +387,57 @@ input.f:focus,select.f:focus,textarea.f:focus{outline:none;border-color:var(--sa
 }
 #cwalek-send svg { width: 16px; height: 16px; stroke: #fff; }
 #cwalek-send:disabled { background: var(--hair); }
+
+/* ===== Agent Picker ===== */
+.agent-picker{position:fixed;inset:0;z-index:880;pointer-events:none}
+.agent-picker.agent-picker--open{pointer-events:all}
+.agent-picker__backdrop{position:absolute;inset:0;background:transparent}
+.agent-picker__panel{
+  position:absolute;top:62px;right:16px;
+  width:272px;
+  background:var(--card);border:1px solid var(--hair);
+  border-radius:20px;box-shadow:var(--shadow-lg);
+  padding:10px;
+  transform:translateY(-8px) scale(.97);opacity:0;
+  transition:transform .2s ease,opacity .2s ease
+}
+.agent-picker--open .agent-picker__panel{transform:none;opacity:1}
+.ap-header{display:flex;align-items:baseline;justify-content:space-between;padding:4px 6px 8px}
+.ap-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}
+.ap-subtitle{font-size:11px;font-weight:600;color:var(--sage-deep)}
+.ap-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:12px;
+  transition:background .15s;
+}
+.ap-row--unlocked{cursor:pointer}
+.ap-row--unlocked:hover{background:var(--sage-mist)}
+.ap-row--current{background:var(--sage-mist)}
+.ap-row--locked{cursor:default}
+.ap-emoji{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.ap-info{flex:1;min-width:0}
+.ap-name{font-size:13px;font-weight:600;color:var(--ink-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap-status{font-size:11px;color:var(--muted);font-weight:500;margin-top:1px}
+.ap-row--unlocked .ap-status{color:var(--sage-deep)}
+.ap-row--current .ap-status{color:var(--sage-deep);font-weight:600}
+.ap-arrow{flex-shrink:0;stroke:var(--muted)}
+.ap-buy{
+  font-size:11px;font-weight:700;
+  color:var(--peach-2);background:var(--peach-mist);
+  border:none;border-radius:8px;padding:4px 9px;cursor:pointer;flex-shrink:0
+}
+.ap-buy:hover{background:var(--peach-1)}
+.ap-see-all{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;margin-top:8px;padding:9px;
+  background:none;border:1px solid var(--hair);border-radius:12px;cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--sage-deep);
+  transition:background .15s,border-color .15s
+}
+.ap-see-all svg{stroke:var(--sage-deep)}
+.ap-see-all:hover{background:var(--sage-mist);border-color:var(--sage)}
+body.dark-mode .agent-picker__panel{background:var(--card);border-color:var(--hair)}
+body.dark-mode .ap-row--unlocked:hover,body.dark-mode .ap-row--current{background:rgba(255,255,255,.06)}
 
 /* ===== Tryb ciemny ===== */
 body.dark-mode {
