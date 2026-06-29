@@ -5,6 +5,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let jezdzcy = [];   // {id, imie, poziom, od, umie[], poprawa[], postawa[], lubi[], konie[], notatki[]}
 let konie = [];     // {id, imie, typ, opis, foto}
 let treningi = [];  // {id, gid, kto, kon, data, typ, grupowa, cw[], nota, ocena}
+let userSubscriptions = []; // ['planer','analityk','raport']
 let screen = "start";
 let monthOpen = false;
 let selDay = new Date().toISOString().slice(0, 10);
@@ -148,7 +149,30 @@ async function onLogin() {
   showView("app");
   content().innerHTML = "<p class='loading'>Ładowanie…</p>";
   await loadAll();
-  go("start");
+  await loadSubscriptions();
+  // Obsługa powrotu z Stripe Checkout
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("payment") === "success") {
+    history.replaceState({}, "", window.location.pathname);
+    go("agenci");
+  } else {
+    if (params.has("payment")) history.replaceState({}, "", window.location.pathname);
+    go("start");
+  }
+}
+
+async function loadSubscriptions() {
+  try {
+    const { data } = await db.from("subscriptions")
+      .select("agent_id, status, current_period_end");
+    userSubscriptions = (data || []).filter(s => {
+      if (s.status !== "active" && s.status !== "trialing") return false;
+      if (s.current_period_end && new Date(s.current_period_end) < new Date()) return false;
+      return true;
+    }).map(s => s.agent_id);
+  } catch {
+    userSubscriptions = [];
+  }
 }
 window.logout = async () => {
   if (!confirm("Wylogować się?")) return;
@@ -197,7 +221,7 @@ function go(s) {
 }
 window.go = go;
 function render() {
-  ({ start: renderStart, jezdzcy: () => renderJezdzcy(""), konie: renderKonie, treningi: renderTreningi })[screen]();
+  ({ start: renderStart, jezdzcy: () => renderJezdzcy(""), konie: renderKonie, treningi: renderTreningi, agenci: renderAgenci })[screen]?.();
 }
 
 // ===== START =====
@@ -1072,5 +1096,245 @@ function initCropDrag(preview, img) {
   preview.addEventListener('touchend', function() { dragging = false; });
 }
 
+
+// ===== AGENCI =====
+const AGENCI_CONFIG = [
+  {
+    id: "planer",
+    nazwa: "Planer treningów",
+    opis: "Układa spersonalizowany plan na 2–4 tygodnie. Analizuje historię, poziom i obszary do poprawy każdego jeźdźca.",
+    emoji: "📋",
+    cena: "9 zł / mc",
+    fn: "planer-treningow",
+    starter: "Ułóż plan treningowy dla...",
+    podpowiedzi: ["Ułóż plan dla Tatiany na 3 tygodnie", "Co powinnam ćwiczyć z Anią w tym miesiącu?", "Plan dla Marty przed zawodami"],
+  },
+  {
+    id: "analityk",
+    nazwa: "Analityk postępów",
+    opis: "Generuje szczegółowe raporty postępów gotowe do wysłania jeźdźcom lub rodzicom. Trendy, statystyki, oceny.",
+    emoji: "📈",
+    cena: "9 zł / mc",
+    fn: "analityk-postepu",
+    starter: "Przeanalizuj postępy...",
+    podpowiedzi: ["Analiza postępów Oli za ostatni miesiąc", "Porównaj wyniki Kuby z poprzednim kwartałem", "Raport dla rodziców Ani"],
+  },
+  {
+    id: "raport",
+    nazwa: "Raport miesięczny",
+    opis: "Generuje kompleksowy raport miesiąca: liczba treningów, aktywność jeźdźców, obciążenie koni, rekomendacje.",
+    emoji: "📊",
+    cena: "12 zł / mc",
+    fn: "raport-miesieczny",
+    starter: null, // auto-generuje przy otwarciu
+    podpowiedzi: ["Pokaż raport za maj", "Co było wyzwaniem w tym miesiącu?", "Jak rozkładało się obciążenie koni?"],
+  },
+];
+
+function renderAgenci() {
+  content().innerHTML = `
+    <div class="brandline">
+      <span class="logo" style="font-size:21px;color:var(--ink-strong)">Agenci AI</span>
+      <div class="right">
+        <button class="me" onclick="logout()" title="Wyloguj">LU</button>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;font-weight:500">Specjalistyczni asystenci AI dla Twojej stajni</p>
+    ${AGENCI_CONFIG.map(a => renderAgentCard(a)).join("")}
+    <div style="margin-top:16px;padding:14px 16px;background:var(--sage-mist);border-radius:16px;font-size:12px;color:var(--sage-deep);font-weight:500;line-height:1.5">
+      🔒 Darmowy agent <b>Cwałek</b> jest zawsze dostępny przez przycisk 🐴 na dole.
+    </div>`;
+}
+
+function renderAgentCard(a) {
+  const active = userSubscriptions.includes(a.id);
+  return `
+    <div class="agent-card ${active ? "agent-card--active" : ""}">
+      <div class="agent-card__top">
+        <div class="agent-emoji">${a.emoji}</div>
+        <div class="agent-info">
+          <div class="agent-nazwa">${a.nazwa}</div>
+          <div class="agent-cena">${active ? "✓ Aktywny" : a.cena}</div>
+        </div>
+        ${active
+          ? `<button class="agent-btn agent-btn--open" onclick="openAgentChat('${a.id}')">Otwórz</button>`
+          : `<button class="agent-btn agent-btn--buy" onclick="subscribeAgent('${a.id}')">Subskrybuj</button>`}
+      </div>
+      <p class="agent-opis">${a.opis}</p>
+      ${active ? `<div class="agent-chips">${a.podpowiedzi.map(p => `<button class="agent-chip" onclick="openAgentChatWith('${a.id}', '${p.replace(/'/g, "\\'")}')">${p}</button>`).join("")}</div>` : ""}
+    </div>`;
+}
+
+window.subscribeAgent = async (agentId) => {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = "Przekierowuję…";
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    const token = session?.access_token;
+    if (!token) { alert("Zaloguj się ponownie."); return; }
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "apikey": SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ agent_id: agentId }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Błąd: " + (data.error || "Nieznany błąd"));
+      btn.disabled = false;
+      btn.textContent = "Subskrybuj";
+    }
+  } catch (err) {
+    alert("Błąd połączenia: " + err);
+    btn.disabled = false;
+    btn.textContent = "Subskrybuj";
+  }
+};
+
+// ===== AGENT CHAT MODAL =====
+let agentChatHistory = [];
+let activeAgentId = null;
+
+window.openAgentChat = (agentId) => {
+  agentChatHistory = [];
+  activeAgentId = agentId;
+  const agent = AGENCI_CONFIG.find(a => a.id === agentId);
+  if (!agent) return;
+  showAgentModal(agent, agent.starter ? null : "__auto__");
+};
+
+window.openAgentChatWith = (agentId, msg) => {
+  agentChatHistory = [];
+  activeAgentId = agentId;
+  const agent = AGENCI_CONFIG.find(a => a.id === agentId);
+  if (!agent) return;
+  showAgentModal(agent, msg);
+};
+
+function showAgentModal(agent, autoMsg) {
+  const existing = document.getElementById("agent-modal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "agent-modal";
+  modal.className = "agent-modal";
+  modal.innerHTML = `
+    <div class="agent-modal__header">
+      <span style="font-size:22px">${agent.emoji}</span>
+      <div>
+        <div class="agent-modal__name">${agent.nazwa}</div>
+        <div class="agent-modal__sub">agent AI · ${agent.cena}</div>
+      </div>
+      <button class="agent-modal__close" onclick="closeAgentModal()">✕</button>
+    </div>
+    <div class="agent-modal__msgs" id="agent-msgs"></div>
+    <div class="agent-modal__chips" id="agent-quick-chips">
+      ${agent.podpowiedzi.map(p => `<button class="agent-chip" onclick="sendAgentMsg('${p.replace(/'/g, "\\'")}')">${p}</button>`).join("")}
+    </div>
+    <div class="agent-modal__input-row">
+      <input type="text" id="agent-input" placeholder="Napisz do ${agent.nazwa}…" autocomplete="off" />
+      <button id="agent-send" onclick="sendAgentMsg()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    </div>`;
+  document.body.appendChild(modal);
+
+  const input = document.getElementById("agent-input");
+  input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendAgentMsg(); } });
+
+  requestAnimationFrame(() => modal.classList.add("agent-modal--open"));
+
+  if (autoMsg === "__auto__") {
+    // raport miesięczny — auto-generuj bez wiadomości wejściowej
+    sendAgentMsg("", true);
+  } else if (autoMsg) {
+    sendAgentMsg(autoMsg);
+  }
+}
+
+window.closeAgentModal = () => {
+  const modal = document.getElementById("agent-modal");
+  if (!modal) return;
+  modal.classList.remove("agent-modal--open");
+  setTimeout(() => modal.remove(), 280);
+};
+
+function appendAgentMsg(role, text) {
+  const el = document.getElementById("agent-msgs");
+  if (!el) return;
+  const div = document.createElement("div");
+  div.className = `agent-msg agent-msg--${role === "user" ? "user" : "bot"}`;
+  div.innerHTML = text.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/^### (.+)$/gm, "<b>$1</b>").replace(/^## (.+)$/gm, "<b style='font-size:14px'>$1</b>");
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+  return div;
+}
+
+window.sendAgentMsg = async (overrideText, silent) => {
+  const agent = AGENCI_CONFIG.find(a => a.id === activeAgentId);
+  if (!agent) return;
+
+  const input = document.getElementById("agent-input");
+  const sendBtn = document.getElementById("agent-send");
+  const chipsEl = document.getElementById("agent-quick-chips");
+  if (chipsEl) chipsEl.style.display = "none";
+
+  const text = overrideText !== undefined ? overrideText : (input?.value?.trim() || "");
+  if (!text && !silent) return;
+
+  if (input) input.value = "";
+  if (sendBtn) sendBtn.disabled = true;
+
+  if (!silent && text) {
+    appendAgentMsg("user", text);
+    agentChatHistory.push({ role: "user", content: text });
+  }
+
+  // Typing indicator
+  const typing = document.createElement("div");
+  typing.className = "agent-msg agent-msg--bot agent-msg--typing";
+  typing.innerHTML = "<span></span><span></span><span></span>";
+  document.getElementById("agent-msgs")?.appendChild(typing);
+  document.getElementById("agent-msgs").scrollTop = 99999;
+
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    const token = session?.access_token;
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/${agent.fn}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "apikey": SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ messages: agentChatHistory }),
+    });
+
+    const data = await res.json();
+    typing.remove();
+
+    if (data.error) {
+      appendAgentMsg("bot", `⚠️ ${data.error}`);
+    } else {
+      const reply = data.reply || "Nie udało się wygenerować odpowiedzi.";
+      appendAgentMsg("bot", reply);
+      agentChatHistory.push({ role: "assistant", content: reply });
+    }
+  } catch (err) {
+    typing.remove();
+    appendAgentMsg("bot", "Błąd połączenia. Sprawdź internet.");
+  }
+
+  if (sendBtn) sendBtn.disabled = false;
+  if (input) input.focus();
+};
 
 init();
