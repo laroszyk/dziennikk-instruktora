@@ -1284,7 +1284,7 @@ const AGENCI_CONFIG = [
     nazwa: "Raport miesięczny",
     opis: "Generuje kompleksowy raport miesiąca: liczba treningów, aktywność jeźdźców, obciążenie koni, rekomendacje.",
     emoji: "📊",
-    cena: "12 zł / mc",
+    cena: "1 zł / mc",
     fn: "raport-miesieczny",
     starter: null, // auto-generuje przy otwarciu
     podpowiedzi: ["Pokaż raport za maj", "Co było wyzwaniem w tym miesiącu?", "Jak rozkładało się obciążenie koni?"],
