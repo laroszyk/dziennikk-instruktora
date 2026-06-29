@@ -156,13 +156,44 @@ async function onLogin() {
   if (localStorage.getItem("darkMode") === "1") document.body.classList.add("dark-mode");
 
   if (params.get("payment") === "success") {
+    const agentId = params.get("agent") || "";
     history.replaceState({}, "", window.location.pathname);
     openKontoPanel();
+    // Webhook może dojść z opóźnieniem — polluj przez maks. 12 sekund
+    if (agentId && !userSubscriptions.includes(agentId)) {
+      pollSubscription(agentId);
+    }
   } else {
     if (params.has("payment")) history.replaceState({}, "", window.location.pathname);
     const defScreen = localStorage.getItem("defaultScreen") || "start";
     go(defScreen);
   }
+}
+
+// Polluje co 2s przez maks. 12s aż agent pojawi się w subskrypcjach (obsługa race condition z webhookiem)
+async function pollSubscription(agentId, attempts = 0) {
+  if (attempts >= 6) return; // 6 × 2s = 12s max
+  await new Promise(r => setTimeout(r, 2000));
+  await loadSubscriptions();
+  if (userSubscriptions.includes(agentId)) {
+    renderKontoAgenci(); // odśwież widok — agent odblokowany
+    return;
+  }
+  renderKontoAgenciVerifying(); // pokaż "Weryfikuję…" dalej
+  pollSubscription(agentId, attempts + 1);
+}
+
+// Tymczasowy render podczas weryfikacji
+function renderKontoAgenciVerifying() {
+  const el = document.getElementById("konto-agenci");
+  if (!el) return;
+  // Zmień przyciski przy niezatwierdzonych agentach na spinner
+  el.querySelectorAll(".konto-agent__btn--buy").forEach(btn => {
+    if (btn.textContent !== "Weryfikuję…") {
+      btn.textContent = "Weryfikuję…";
+      btn.disabled = true;
+    }
+  });
 }
 
 async function loadSubscriptions() {
