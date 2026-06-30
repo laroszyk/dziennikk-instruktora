@@ -505,6 +505,15 @@ body.dark-mode .cwalek-msg--bot p { background:var(--bg); border-color:var(--hai
 body.dark-mode .cwalek-input-row input { background:var(--card); color:var(--ink); border-color:var(--hair); }
 body.dark-mode .ust-card { background: var(--card); border-color: var(--hair); }
 body.dark-mode .ust-subform { background:var(--sage-mist); }
+/* Tabbar i header */
+body.dark-mode .tabbar { background:rgba(37,41,40,.94); border-color:var(--hair); }
+body.dark-mode .tab { color:#6B7068; }
+body.dark-mode .tab.active { background:var(--sage-mist); color:var(--sage-deep); }
+body.dark-mode .brandline .iconbtn { background:var(--card); border-color:var(--hair); }
+body.dark-mode .brandline .iconbtn svg { stroke:var(--ink); }
+body.dark-mode .brandline .iconbtn--ai { background:var(--peach-mist); border-color:#3D2A1E; }
+body.dark-mode .brandline .iconbtn--ai svg { stroke:var(--peach-2); }
+body.dark-mode .brandline .me { background:var(--sage-mist); color:var(--sage-deep); }
 
 /* ===== Panel konta ===== */
 .konto-panel {
