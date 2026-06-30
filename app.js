@@ -1560,7 +1560,14 @@ function appendAgentMsg(role, text) {
   if (!el) return;
   const div = document.createElement("div");
   div.className = `agent-msg agent-msg--${role === "user" ? "user" : "bot"}`;
-  div.innerHTML = text.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/^### (.+)$/gm, "<b>$1</b>").replace(/^## (.+)$/gm, "<b style='font-size:14px'>$1</b>");
+  // Escape HTML przed renderowaniem markdown (zapobiega XSS z odpowiedzi AI)
+  const safe = text
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^### (.+)$/gm, "<b>$1</b>")
+    .replace(/^## (.+)$/gm, "<b style='font-size:14px'>$1</b>");
+  div.innerHTML = safe;
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
   return div;
