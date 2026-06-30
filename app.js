@@ -1219,9 +1219,8 @@ window.openKontoPanel = async () => {
   // Załaduj ustawienia z localStorage
   loadUstawienia();
 
-  // Odśwież subskrypcje i renderuj agentów
+  // Odśwież subskrypcje
   await loadSubscriptions();
-  renderKontoAgenci();
 };
 
 window.closeKontoPanel = () => {

@@ -457,11 +457,54 @@ body.dark-mode {
   --peach-mist:#2A2019; --shadow:0 4px 20px rgba(0,0,0,.25);
   --shadow-lg:0 10px 34px rgba(0,0,0,.4);
 }
-body.dark-mode .konto-panel__sheet,
-body.dark-mode .agent-modal,
+/* Karty i powierzchnie */
+body.dark-mode .login-card { background:var(--card); border-color:var(--hair); }
+body.dark-mode .btn-google { background:var(--card); border-color:var(--hair); color:var(--ink); }
+body.dark-mode .stat-box { background:var(--card); border-color:var(--hair); }
+body.dark-mode .calbox { background:var(--card); border-color:var(--hair); }
+body.dark-mode .row { background:var(--card); border-color:var(--hair); }
+body.dark-mode .section { background:var(--card); border-color:var(--hair); }
+body.dark-mode .t-row { background:var(--card); border-color:var(--hair); }
+body.dark-mode .t-detail { border-color:var(--hair); }
+body.dark-mode .rider-mini { background:var(--card); border-color:var(--hair); }
+body.dark-mode .b-card { background:var(--card); border-color:var(--hair); }
+body.dark-mode .b-card.m-sage { background:var(--sage-mist); border-color:transparent; }
+body.dark-mode .b-card.m-peach { background:var(--peach-mist); border-color:transparent; }
+body.dark-mode .b-card.m-sand { background:var(--sand-mist); border-color:transparent; }
+body.dark-mode .horse-card { background:var(--card); border-color:var(--hair); }
+body.dark-mode .card { background:var(--card); border-color:var(--hair); }
+body.dark-mode .toggle-row { background:var(--card); border-color:var(--hair); }
+body.dark-mode .rider-block { background:var(--card); border-color:var(--hair); }
+body.dark-mode .btn-back { background:var(--card); border-color:var(--hair); color:var(--ink); }
+/* Formularz */
+body.dark-mode input.f, body.dark-mode select.f, body.dark-mode textarea.f { background:var(--card); color:var(--ink); border-color:var(--hair); }
+body.dark-mode .add-row input, body.dark-mode textarea.note-input { background:var(--card); color:var(--ink); border-color:var(--hair); }
+body.dark-mode .search { background:var(--card); color:var(--ink); border-color:var(--hair); }
+body.dark-mode .ust-select { background:var(--card); color:var(--sage); border-color:var(--hair); }
+/* Custom select dropdown */
+body.dark-mode .csel-val { background:var(--card); border-color:var(--hair); color:var(--ink); }
+body.dark-mode .csel-drop { background:var(--card); border-color:var(--hair); }
+body.dark-mode .csel-opt:hover { background:var(--sage-mist); }
+body.dark-mode .csel-opt.active { background:var(--sage-mist); }
+/* Przyciski segmentowe */
+body.dark-mode .seg button { background:var(--card); border-color:var(--hair); color:var(--muted); }
+body.dark-mode .who { background:var(--card); border-color:var(--hair); color:var(--ink); }
+body.dark-mode .cw { background:var(--card); border-color:var(--hair); color:var(--ink); }
+body.dark-mode .cw.on { background:var(--sage); color:#fff; }
+/* Panele */
+body.dark-mode .konto-panel__sheet { background: var(--card); }
+body.dark-mode .konto-panel__logout { background:#2a1f1e; border-color:#5a2e2a; color:#e08070; }
+body.dark-mode .agent-modal { background: var(--bg); }
+body.dark-mode .agent-modal__header { background:var(--card); border-color:var(--hair); }
+body.dark-mode .agent-modal__chips, body.dark-mode .agent-modal__input-row { background:var(--card); border-color:var(--hair); }
+body.dark-mode .agent-modal__input-row input { background:var(--bg); color:var(--ink); border-color:var(--hair); }
+body.dark-mode .agent-msg--bot { background:var(--card); border-color:var(--hair); color:var(--ink); }
 body.dark-mode .cwalek-panel { background: var(--card); }
-body.dark-mode .ust-card { background: #1E2220; border-color: var(--hair); }
-body.dark-mode input.f, body.dark-mode select.f, body.dark-mode textarea.f { background:#1C1F1D; color:var(--ink); border-color:var(--hair); }
+body.dark-mode .cwalek-header, body.dark-mode .cwalek-input-row { background:var(--bg); border-color:var(--hair); }
+body.dark-mode .cwalek-msg--bot p { background:var(--bg); border-color:var(--hair); color:var(--ink); }
+body.dark-mode .cwalek-input-row input { background:var(--card); color:var(--ink); border-color:var(--hair); }
+body.dark-mode .ust-card { background: var(--card); border-color: var(--hair); }
+body.dark-mode .ust-subform { background:var(--sage-mist); }
 
 /* ===== Panel konta ===== */
 .konto-panel {
@@ -547,10 +590,15 @@ body.dark-mode input.f, body.dark-mode select.f, body.dark-mode textarea.f { bac
 .ust-row__arrow { font-size: 18px; color: var(--muted); font-weight: 300; }
 .ust-row__value { font-size: 13px; color: var(--muted); font-weight: 500; }
 .ust-select {
-  border: none; background: transparent; font-family: inherit;
-  font-size: 13px; font-weight: 600; color: var(--sage-deep); cursor: pointer;
-  outline: none; padding: 2px 4px;
+  border: 1.5px solid var(--hair); background: var(--bg); font-family: inherit;
+  font-size: 12px; font-weight: 600; color: var(--sage-deep); cursor: pointer;
+  outline: none; padding: 6px 28px 6px 12px; border-radius: 12px;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23557F69' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  transition: border-color .15s;
 }
+.ust-select:hover { border-color: var(--sage); }
 
 /* Awatar */
 .ust-avatar-row {
