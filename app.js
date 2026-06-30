@@ -148,6 +148,18 @@ window.switchAuthMode = (mode) => {
   }
 };
 
+window.loginWithGoogle = async function() {
+  const { error } = await db.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) {
+    const err = document.getElementById("login-error");
+    err.textContent = error.message;
+    err.classList.remove("hidden");
+  }
+};
+
 document.getElementById("login-form").addEventListener("submit", async e => {
   e.preventDefault();
   const err = document.getElementById("login-error");

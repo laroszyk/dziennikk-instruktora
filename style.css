@@ -42,6 +42,11 @@ button{font-family:inherit;cursor:pointer}
 .register-fields{animation:pop .2s ease}
 .auth-success{color:var(--sage-deep);font-size:13px;font-weight:600;margin-top:10px;text-align:center}
 .error{color:#B5503F;font-size:13px;font-weight:600;margin-top:10px;text-align:center}
+/* Google login */
+.auth-divider{display:flex;align-items:center;gap:10px;margin:18px 0 14px;color:var(--muted);font-size:12px;font-weight:500}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--hair)}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 16px;border:1.5px solid var(--hair);border-radius:14px;background:#fff;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit;transition:box-shadow .18s,border-color .18s}
+.btn-google:hover{border-color:#ccc;box-shadow:0 2px 8px rgba(0,0,0,.07)}
 
 /* ===== Nagłówek ===== */
 .brandline{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
