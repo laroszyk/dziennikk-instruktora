@@ -1,0 +1,20 @@
+# Lokalne sekrety — NIGDY nie pushuj tych plików
+.env
+.env.local
+.env.*.local
+
+# Wygenerowane pliki z kluczami — NIE trafiają do repo
+config.js
+
+# System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Edytory
+.vscode/settings.json
+*.swp

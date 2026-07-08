@@ -33,18 +33,19 @@ Deno.serve(async (req) => {
     // Body
     const { agent_id } = await req.json();
 
-    const PRICE_IDS: Record<string, string | undefined> = {
-      planer: Deno.env.get("STRIPE_PRICE_PLANER"),
-      analityk: Deno.env.get("STRIPE_PRICE_ANALITYK"),
-      raport: Deno.env.get("STRIPE_PRICE_RAPORT"),
+    const PRICE_IDS: Record<string, string> = {
+      planer:   Deno.env.get("STRIPE_PRICE_PLANER")   || "price_1Tni0zBGyoIKPOTdEFier1ki",
+      analityk: Deno.env.get("STRIPE_PRICE_ANALITYK") || "price_1Tni1KBGyoIKPOTdVD4rVYL2",
+      raport:   Deno.env.get("STRIPE_PRICE_RAPORT")   || "price_1Tni1WBGyoIKPOTdQHjPPhNo",
     };
 
     const priceId = PRICE_IDS[agent_id];
-    if (!priceId) return json({ error: `Nieznany agent lub brak price ID: ${agent_id}` }, 400);
+    if (!priceId) return json({ error: `Nieznany agent: ${agent_id}` }, 400);
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
-      apiVersion: "2024-04-10",
-    });
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeSecretKey) return json({ error: "Konfiguracja serwera: brak STRIPE_SECRET_KEY" }, 500);
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2024-04-10" });
 
     // Pobierz lub utwórz Stripe Customer
     let stripeCustomerId: string;
@@ -76,6 +77,7 @@ Deno.serve(async (req) => {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
+      allow_promotion_codes: true,
       success_url: `${origin}?payment=success&agent=${agent_id}`,
       cancel_url: `${origin}?payment=cancel&agent=${agent_id}`,
       subscription_data: {

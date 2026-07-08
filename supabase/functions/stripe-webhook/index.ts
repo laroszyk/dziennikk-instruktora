@@ -8,14 +8,19 @@ Deno.serve(async (req) => {
   const body = await req.text();
 
   try {
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
-      apiVersion: "2024-04-10",
-    });
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    if (!stripeSecretKey || !webhookSecret) {
+      console.error("Brak STRIPE_SECRET_KEY lub STRIPE_WEBHOOK_SECRET w env");
+      return new Response("Konfiguracja serwera: brak kluczy Stripe", { status: 500 });
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2024-04-10" });
 
     const event = await stripe.webhooks.constructEventAsync(
       body,
       signature,
-      Deno.env.get("STRIPE_WEBHOOK_SECRET")!
+      webhookSecret
     );
 
     const supabase = createClient(

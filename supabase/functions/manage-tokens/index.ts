@@ -40,8 +40,9 @@ Deno.serve(async (req: Request) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // POST — generuj token (publiczne, bez auth)
+  // POST — generuj token (wymaga master key)
   if (req.method === "POST") {
+    if (!isMaster(req)) return json({ error: "Nieautoryzowany dostęp." }, 401);
     let body: { name?: string };
     try { body = await req.json(); } catch { return json({ error: "Nieprawidłowy JSON." }, 400); }
     if (!body.name?.trim()) return json({ error: "Pole 'name' jest wymagane." }, 400);
