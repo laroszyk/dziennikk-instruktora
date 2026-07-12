@@ -497,11 +497,11 @@ window.zapiszJezdzca = async () => {
   const { error } = await db.from("jezdzcy").insert({
     imie, poziom: document.getElementById("nj-poziom").value,
     jezdzi_od: document.getElementById("nj-od").value.trim() || null,
-    umie: split("nj-umie"),
-    poprawa: split("nj-poprawa"),
+    umiejetnosci: split("nj-umie"),
+    do_poprawy: split("nj-poprawa"),
     postawa: split("nj-postawa"),
     konie: konieVal,
-    lubi: split("nj-lubi"),
+    preferencje: split("nj-lubi"),
     notatki: notatki ? [notatki] : []
   });
   if (error) { alert("Błąd: " + error.message); return; }
