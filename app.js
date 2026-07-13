@@ -663,7 +663,8 @@ window.renderEditKon = function(id) {
         Przeciągnij żeby wykadrować
       </div>
     </div>
-    <button class="btn-primary" onclick="zapiszEdycjeKonia('${id}')">Zapisz zmiany</button>`;
+    <button class="btn-primary" onclick="zapiszEdycjeKonia('${id}')">Zapisz zmiany</button>
+    <button class="btn-danger" onclick="usunKonia('${id}','${esc(k.imie).replace(/'/g, "\\'")}')">Usuń konia</button>`;
   initCustomSelects();
   window.scrollTo(0, 0);
   setTimeout(() => {
@@ -690,6 +691,22 @@ window.zapiszEdycjeKonia = async (id) => {
     zdjecie_pos: document.getElementById('ek-foto-img')?.dataset?.pos || '50% 50%'
   }).eq("id", id);
   if (error) { alert("Błąd: " + error.message); btn.disabled = false; btn.textContent = "Zapisz zmiany"; return; }
+  await loadAll(); go("konie");
+};
+
+window.usunKonia = async (id, imie) => {
+  if (!confirm(`Usunąć konia "${imie}"? Tej operacji nie można cofnąć.`)) return;
+  const btn = document.querySelector(".btn-danger");
+  if (btn) { btn.disabled = true; btn.textContent = "Usuwanie..."; }
+  const { error } = await db.from("konie").delete().eq("id", id);
+  if (error) {
+    const zajety = error.code === "23503" || /foreign key/i.test(error.message || "");
+    alert(zajety
+      ? "Nie można usunąć tego konia — jest przypisany do treningów lub jest czyimś ulubionym koniem. Usuń najpierw powiązane treningi."
+      : "Błąd: " + error.message);
+    if (btn) { btn.disabled = false; btn.textContent = "Usuń konia"; }
+    return;
+  }
   await loadAll(); go("konie");
 };
 
