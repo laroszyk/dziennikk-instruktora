@@ -8,20 +8,21 @@ const path = require("path");
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const STRAPI_URL = process.env.STRAPI_URL || "https://strapi-production-6bf4.up.railway.app";
+const STRAPI_TOKEN = process.env.STRAPI_TOKEN || "";
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error("BŁĄD: Brak zmiennych SUPABASE_URL lub SUPABASE_ANON_KEY");
-  console.error("Dodaj je w Vercel → Settings → Environment Variables");
+  console.error("BLAD: Brak zmiennych SUPABASE_URL lub SUPABASE_ANON_KEY");
+  console.error("Dodaj je w Vercel -> Settings -> Environment Variables");
   process.exit(1);
 }
 
 const config = `// Ten plik jest GENEROWANY automatycznie przez build.js
-// NIE edytuj ręcznie — zmiany się nadpiszą przy następnym buildzie
+// NIE edytuj recznie - zmiany sie nadpisza przy nastepnym buildzie
 const SUPABASE_URL = "${SUPABASE_URL}";
 const SUPABASE_ANON_KEY = "${SUPABASE_ANON_KEY}";
 const STRAPI_URL = "${STRAPI_URL}";
+const STRAPI_TOKEN = "${STRAPI_TOKEN}";
 `;
 
-const outputPath = path.join(__dirname, "config.js");
-fs.writeFileSync(outputPath, config, "utf8");
-console.log("✓ config.js wygenerowany z env vars");
+if (!STRAPI_TOKEN) {
+  console.warn("Uwaga: brak STRAPI_TOKEN - zapisy 

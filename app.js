@@ -1,5 +1,35 @@
 // Dziennik Instruktora — aplikacja (design v1 + Supabase)
+// Dane (konie / jeźdźcy / treningi): Strapi. Logowanie: Supabase Auth. Zdjęcia: Supabase Storage.
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== Strapi (konie / jeźdźcy / treningi) =====
+const _STRAPI_URL = (typeof STRAPI_URL !== "undefined" ? STRAPI_URL : "https://strapi-production-6bf4.up.railway.app");
+const _STRAPI_TOKEN = (typeof STRAPI_TOKEN !== "undefined" && STRAPI_TOKEN) ? STRAPI_TOKEN : null;
+async function strapi(method, path, data) {
+  const headers = { "Content-Type": "application/json" };
+  if (_STRAPI_TOKEN) headers.Authorization = `Bearer ${_STRAPI_TOKEN}`;
+  const res = await fetch(`${_STRAPI_URL}${path}`, {
+    method,
+    headers,
+    body: data !== undefined ? JSON.stringify({ data }) : undefined,
+  });
+  let body = null;
+  try { body = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error(body?.error?.message || `Strapi ${method} ${path} -> ${res.status}`);
+  return body;
+}
+async function strapiAll(path) {
+  const sep = path.includes("?") ? "&" : "?";
+  let page = 1, out = [];
+  while (true) {
+    const body = await strapi("GET", `${path}${sep}pagination[page]=${page}&pagination[pageSize]=100`);
+    out = out.concat(body.data || []);
+    const pc = body.meta?.pagination?.pageCount || 1;
+    if (page >= pc) break;
+    page++;
+  }
+  return out;
+}
 
 // ===== Stan =====
 let jezdzcy = [];   // {id, imie, poziom, od, umie[], poprawa[], postawa[], lubi[], konie[], notatki[]}
@@ -286,15 +316,15 @@ window.logout = async () => {
   showView("login");
 };
 
-// ===== Dane z Supabase =====
+// ===== Dane ze Strapi =====
 async function loadAll() {
   const [jz, kn] = await Promise.all([
-    db.from("jezdzcy").select("*").eq("aktywny", true).order("imie"),
-    db.from("konie").select("*").order("imie"),
+    strapiAll(`/api/jezdzcy?filters[aktywny][$eq]=true&sort=imie:asc`),
+    strapiAll(`/api/konie?sort=imie:asc`),
   ]);
-  konie = (kn.data || []).map(r => ({ id: r.id, imie: r.imie, typ: r.typ || "uniwersalny", opis: r.charakterystyka || "", foto: r.zdjecie_url || "", fit: r.zdjecie_fit || "cover", pos: r.zdjecie_pos || "50% 50%" }));
-  jezdzcy = (jz.data || []).map(r => ({
-    id: r.id, imie: r.imie, poziom: r.poziom || "—", od: r.jezdzi_od || "—",
+  konie = kn.map(r => ({ id: r.documentId, imie: r.imie, typ: r.typ || "uniwersalny", opis: r.charakterystyka || "", foto: r.foto_url || "", fit: r.foto_fit || "cover", pos: r.foto_position || "50% 50%" }));
+  jezdzcy = jz.map(r => ({
+    id: r.documentId, imie: r.imie, poziom: r.poziom || "—", od: r.jezdzi_od || "—",
     umie: r.umiejetnosci || [], poprawa: r.do_poprawy || [], postawa: r.postawa || [],
     lubi: r.preferencje || [], konie: r.konie || [],
     notatki: Array.isArray(r.notatki) ? r.notatki : []
@@ -302,18 +332,16 @@ async function loadAll() {
   await loadTreningi();
 }
 async function loadTreningi() {
-  const { data } = await db.from("treningi").select("*").order("data", { ascending: false }).order("created_at", { ascending: false });
-  const jById = Object.fromEntries(jezdzcy.map(j => [j.id, j.imie]));
-  const kById = Object.fromEntries(konie.map(k => [k.id, k.imie]));
-  treningi = (data || []).map(r => ({
-    id: r.id, gid: r.gid, kto: jById[r.jezdziec_id] || "?", kon: kById[r.kon_id] || "—",
+  const rows = await strapiAll(`/api/treningi?populate[jezdziec][fields][0]=imie&populate[kon][fields][0]=imie&sort=data:desc&sort=createdAt:desc`);
+  treningi = rows.map(r => ({
+    id: r.documentId, gid: r.gid, kto: r.jezdziec?.imie || "?", kon: r.kon?.imie || "—",
     data: r.data, typ: r.typ_jazdy || "plac", grupowa: !!r.grupowa,
     cw: r.cwiczenia || [], nota: r.uwagi || "—", ocena: r.ocena || 0
   }));
 }
 async function saveJ(i, cols) {
-  const { error } = await db.from("jezdzcy").update(cols).eq("id", jezdzcy[i].id);
-  if (error) alert("Błąd zapisu: " + error.message);
+  try { await strapi("PUT", `/api/jezdzcy/${jezdzcy[i].id}`, cols); }
+  catch (e) { alert("Błąd zapisu: " + e.message); }
 }
 const COLMAP = { umie: "umiejetnosci", poprawa: "do_poprawy", postawa: "postawa", konie: "konie", lubi: "preferencje" };
 
@@ -494,17 +522,19 @@ window.zapiszJezdzca = async () => {
   const konieEl = document.getElementById("nj-konie");
   const konieVal = konieEl ? Array.from(konieEl.selectedOptions).map(o => o.value) : [];
   const notatki = document.getElementById("nj-notatki").value.trim();
-  const { error } = await db.from("jezdzcy").insert({
-    imie, poziom: document.getElementById("nj-poziom").value,
-    jezdzi_od: document.getElementById("nj-od").value.trim() || null,
-    umiejetnosci: split("nj-umie"),
-    do_poprawy: split("nj-poprawa"),
-    postawa: split("nj-postawa"),
-    konie: konieVal,
-    preferencje: split("nj-lubi"),
-    notatki: notatki ? [notatki] : []
-  });
-  if (error) { alert("Błąd: " + error.message); return; }
+  try {
+    await strapi("POST", "/api/jezdzcy", {
+      imie, poziom: document.getElementById("nj-poziom").value,
+      jezdzi_od: document.getElementById("nj-od").value.trim() || null,
+      umiejetnosci: split("nj-umie"),
+      do_poprawy: split("nj-poprawa"),
+      postawa: split("nj-postawa"),
+      konie: konieVal,
+      preferencje: split("nj-lubi"),
+      notatki: notatki ? [notatki] : [],
+      aktywny: true
+    });
+  } catch (e) { alert("Błąd: " + e.message); return; }
   await loadAll(); go("jezdzcy");
 };
 
@@ -682,15 +712,16 @@ window.zapiszEdycjeKonia = async (id) => {
   if (!imie) { alert("Podaj imię konia."); return; }
   const btn = document.querySelector(".btn-primary");
   btn.disabled = true; btn.textContent = "Zapisywanie...";
-  const { error } = await db.from("konie").update({
-    imie,
-    typ: document.getElementById("ek-typ").value,
-    charakterystyka: document.getElementById("ek-opis").value.trim() || null,
-    zdjecie_url: document.getElementById("ek-foto").value.trim() || null,
-    zdjecie_fit: document.querySelector('#ek-fit-seg .on')?.textContent === 'Crop' ? 'cover' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fit' ? 'contain' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fill' ? 'fill' : 'cover',
-    zdjecie_pos: document.getElementById('ek-foto-img')?.dataset?.pos || '50% 50%'
-  }).eq("id", id);
-  if (error) { alert("Błąd: " + error.message); btn.disabled = false; btn.textContent = "Zapisz zmiany"; return; }
+  try {
+    await strapi("PUT", `/api/konie/${id}`, {
+      imie,
+      typ: document.getElementById("ek-typ").value,
+      charakterystyka: document.getElementById("ek-opis").value.trim() || null,
+      foto_url: document.getElementById("ek-foto").value.trim() || null,
+      foto_fit: document.querySelector('#ek-fit-seg .on')?.textContent === 'Crop' ? 'cover' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fit' ? 'contain' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fill' ? 'fill' : 'cover',
+      foto_position: document.getElementById('ek-foto-img')?.dataset?.pos || '50% 50%'
+    });
+  } catch (e) { alert("Błąd: " + e.message); btn.disabled = false; btn.textContent = "Zapisz zmiany"; return; }
   await loadAll(); go("konie");
 };
 
@@ -698,12 +729,13 @@ window.usunKonia = async (id, imie) => {
   if (!confirm(`Usunąć konia "${imie}"? Tej operacji nie można cofnąć.`)) return;
   const btn = document.querySelector(".btn-danger");
   if (btn) { btn.disabled = true; btn.textContent = "Usuwanie..."; }
-  const { error } = await db.from("konie").delete().eq("id", id);
-  if (error) {
-    const zajety = error.code === "23503" || /foreign key/i.test(error.message || "");
+  try {
+    await strapi("DELETE", `/api/konie/${id}`);
+  } catch (e) {
+    const zajety = /foreign key|relation|constraint/i.test(e.message || "");
     alert(zajety
       ? "Nie można usunąć tego konia — jest przypisany do treningów lub jest czyimś ulubionym koniem. Usuń najpierw powiązane treningi."
-      : "Błąd: " + error.message);
+      : "Błąd: " + e.message);
     if (btn) { btn.disabled = false; btn.textContent = "Usuń konia"; }
     return;
   }
@@ -718,6 +750,7 @@ window.zapiszKonia = async () => {
   let fotoUrl = document.getElementById("nk-foto").value.trim() || null;
   const plik = document.getElementById("nk-plik").files[0];
   if (plik) {
+    // Zdjęcie trafia do Supabase Storage (bucket "konie") — w Strapi zapisujemy tylko link.
     const ext = plik.name.split(".").pop();
     const path = `${Date.now()}-${imie.replace(/\s+/g, "-")}.${ext}`;
     const { error: upErr } = await db.storage.from("konie").upload(path, plik, { contentType: plik.type });
@@ -725,12 +758,13 @@ window.zapiszKonia = async () => {
     const { data } = db.storage.from("konie").getPublicUrl(path);
     fotoUrl = data.publicUrl;
   }
-  const { error } = await db.from("konie").insert({
-    imie, typ: document.getElementById("nk-typ").value,
-    charakterystyka: document.getElementById("nk-opis").value.trim() || null,
-    zdjecie_url: fotoUrl
-  });
-  if (error) { alert("Błąd: " + error.message); btn.disabled = false; btn.textContent = "Zapisz konia"; return; }
+  try {
+    await strapi("POST", "/api/konie", {
+      imie, typ: document.getElementById("nk-typ").value,
+      charakterystyka: document.getElementById("nk-opis").value.trim() || null,
+      foto_url: fotoUrl
+    });
+  } catch (e) { alert("Błąd: " + e.message); btn.disabled = false; btn.textContent = "Zapisz konia"; return; }
   await loadAll(); go("konie");
 };
 
@@ -739,8 +773,8 @@ window.toggleT = (k) => { expandedT = (expandedT === k) ? null : k; renderTrenin
 window.usunTrening = async (gid) => {
   if (!confirm("Usunąć ten trening (wszystkich uczestników)?")) return;
   const czl = treningi.filter(t => gKey(t) === gid);
-  const { error } = await db.from("treningi").delete().in("id", czl.map(t => t.id));
-  if (error) { alert("Błąd: " + error.message); return; }
+  try { await Promise.all(czl.map(t => strapi("DELETE", `/api/treningi/${t.id}`))); }
+  catch (e) { alert("Błąd: " + e.message); return; }
   await loadTreningi();
   expandedT = null; renderTreningi();
 };
@@ -914,20 +948,21 @@ window.zapiszTrening = async () => {
   const rows = wybrani.map(i => {
     const j = jezdzcy[i];
     return {
-      gid, jezdziec_id: j.id,
-      kon_id: kByName[document.getElementById("f-kon-" + i).value] || null,
+      gid, jezdziec: j.id,
+      kon: kByName[document.getElementById("f-kon-" + i).value] || null,
       data, typ_jazdy: typSel, grupowa: wybrani.length > 1,
       cwiczenia: [...cwSel],
       uwagi: sameAll ? (document.getElementById("f-nota-shared").value || "—") : (document.getElementById("f-nota-" + i).value || "—"),
       ocena: sameAll ? getOcena("f-ocena-shared") : getOcena("f-ocena-" + i)
     };
   });
-  if (edycja !== null) {
-    const stare = treningi.filter(t => gKey(t) === edycja);
-    await db.from("treningi").delete().in("id", stare.map(t => t.id));
-  }
-  const { error } = await db.from("treningi").insert(rows);
-  if (error) { alert("Błąd zapisu: " + error.message); return; }
+  try {
+    if (edycja !== null) {
+      const stare = treningi.filter(t => gKey(t) === edycja);
+      await Promise.all(stare.map(t => strapi("DELETE", `/api/treningi/${t.id}`)));
+    }
+    await Promise.all(rows.map(r => strapi("POST", "/api/treningi", r)));
+  } catch (e) { alert("Błąd zapisu: " + e.message); btn.disabled = false; btn.textContent = edycja ? "Zapisz zmiany" : "Zapisz trening"; return; }
   const bylaEdycja = edycja !== null;
   selDay = data;
   edycja = null;
