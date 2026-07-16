@@ -16,13 +16,14 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   process.exit(1);
 }
 
+// UWAGA: STRAPI_TOKEN celowo NIE trafia do config.js — token jest sekretem
+// funkcji Supabase "strapi-proxy" i zostaje po stronie serwera.
 const config = `// Ten plik jest GENEROWANY automatycznie przez build.js
 // NIE edytuj recznie - zmiany sie nadpisza przy nastepnym buildzie
 const SUPABASE_URL = "${SUPABASE_URL}";
 const SUPABASE_ANON_KEY = "${SUPABASE_ANON_KEY}";
-const STRAPI_URL = "${STRAPI_URL}";
-const STRAPI_TOKEN = "${STRAPI_TOKEN}";
 `;
 
-if (!STRAPI_TOKEN) {
-  console.warn("Uwaga: brak STRAPI_TOKEN - zapisy 
+const outputPath = path.join(__dirname, "config.js");
+fs.writeFileSync(outputPath, config, "utf8");
+console.log("OK: config.js wygenerowany z env vars");

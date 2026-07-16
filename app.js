@@ -3,19 +3,24 @@
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===== Strapi (konie / jeźdźcy / treningi) =====
-const _STRAPI_URL = (typeof STRAPI_URL !== "undefined" ? STRAPI_URL : "https://strapi-production-6bf4.up.railway.app");
-const _STRAPI_TOKEN = (typeof STRAPI_TOKEN !== "undefined" && STRAPI_TOKEN) ? STRAPI_TOKEN : null;
+// Zapytania do Strapi idą przez serwerową funkcję-proxy (token Strapi jest po stronie serwera,
+// NIE w przeglądarce). Wymaga zalogowanego użytkownika (JWT Supabase).
+const _STRAPI_PROXY_URL = `${SUPABASE_URL}/functions/v1/strapi-proxy`;
 async function strapi(method, path, data) {
-  const headers = { "Content-Type": "application/json" };
-  if (_STRAPI_TOKEN) headers.Authorization = `Bearer ${_STRAPI_TOKEN}`;
-  const res = await fetch(`${_STRAPI_URL}${path}`, {
-    method,
-    headers,
-    body: data !== undefined ? JSON.stringify({ data }) : undefined,
+  const { data: { session } } = await db.auth.getSession();
+  const jwt = session?.access_token || "";
+  const res = await fetch(_STRAPI_PROXY_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${jwt}`,
+      "apikey": SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ method, path, data }),
   });
   let body = null;
   try { body = await res.json(); } catch (e) {}
-  if (!res.ok) throw new Error(body?.error?.message || `Strapi ${method} ${path} -> ${res.status}`);
+  if (!res.ok) throw new Error(body?.error?.message || body?.error || `Strapi ${method} ${path} -> ${res.status}`);
   return body;
 }
 async function strapiAll(path) {
@@ -477,7 +482,7 @@ function renderJezdzcy(filter) {
       const i = jezdzcy.indexOf(j);
       return `<div class="row" onclick="renderProfil(${i})">
         <span class="av" style="${avStyle(i)}">${ini(j.imie)}</span>
-        <span class="tx"><b>${esc(j.imie)}</b><span class="m">${esc(j.poziom)} · ${j.lubi.join(", ") || "—"}</span></span>
+        <span class="tx"><b>${esc(j.imie)}</b><span class="m">${esc(j.poziom)} · ${esc(j.lubi.join(", ")) || "—"}</span></span>
         <span class="aside">→</span>
       </div>`;}).join("") || `<p style="color:var(--muted);font-weight:500">Brak wyników.</p>`}`;
   const s = document.getElementById("szukaj");
@@ -559,7 +564,7 @@ window.renderProfil = function (i) {
     ${notatkiHTML(i, j)}
     <div class="section">
       <div class="s-h"><h4>Ostatnie treningi (${hist.length})</h4></div>
-      ${hist.length ? hist.slice(0, 10).map(t => `<p style="padding:3px 0"><b>${t.data.slice(8)}.${t.data.slice(5, 7)}</b> · ${esc(t.kon)} · ${t.typ} · ${stars(t.ocena)}</p>`).join("") : "<p style='color:var(--muted)'>Brak wpisów.</p>"}
+      ${hist.length ? hist.slice(0, 10).map(t => `<p style="padding:3px 0"><b>${t.data.slice(8)}.${t.data.slice(5, 7)}</b> · ${esc(t.kon)} · ${esc(t.typ)} · ${stars(t.ocena)}</p>`).join("") : "<p style='color:var(--muted)'>Brak wpisów.</p>"}
     </div>`;
 };
 
@@ -588,7 +593,7 @@ function notatkiHTML(i, j) {
   const isEdit = editing === "notatki";
   return `<div class="section">
     <div class="s-h"><h4>Notatki</h4><button class="btn-edit" onclick="toggleEdit(${i},'notatki')">${isEdit ? "Zamknij" : "Edytuj"}</button></div>
-    ${j.notatki.map((n, ni) => `<div class="note-item">${esc(n.t)}<div class="m">${n.d}${isEdit ? ` · <span style="color:#B5704C;cursor:pointer" onclick="usunNote(${i},${ni})">usuń</span>` : ""}</div></div>`).join("") || `<p style="color:var(--muted)">Brak notatek.</p>`}
+    ${j.notatki.map((n, ni) => `<div class="note-item">${esc(n.t)}<div class="m">${esc(n.d)}${isEdit ? ` · <span style="color:#B5704C;cursor:pointer" onclick="usunNote(${i},${ni})">usuń</span>` : ""}</div></div>`).join("") || `<p style="color:var(--muted)">Brak notatek.</p>`}
     ${isEdit ? `<div class="edit-area">
       <textarea class="note-input" id="inp-notatki" rows="2" placeholder="Nowa notatka..."></textarea>
       <div class="add-row" style="margin-top:8px">
@@ -617,7 +622,7 @@ function renderKonie() {
     <div class="horse-grid">
       ${konie.map(k => `
         <div class="horse-card">
-          <div class="ph" style="position:relative"><img src="${k.foto}" alt="${esc(k.imie)}" loading="lazy" style="object-fit:${k.fit || 'cover'};object-position:${k.pos || '50% 50%'}" onerror="this.style.display='none'"/>
+          <div class="ph" style="position:relative"><img src="${esc(k.foto)}" alt="${esc(k.imie)}" loading="lazy" style="object-fit:${esc(k.fit || 'cover')};object-position:${esc(k.pos || '50% 50%')}" onerror="this.style.display='none'"/>
             <button class="horse-edit-btn" onclick="renderEditKon('${k.id}')" title="Edytuj">✎</button>
           </div>
           <div class="body">
@@ -663,6 +668,19 @@ window.previewFoto = function(input) {
   preview.style.display = "block";
   label.textContent = file.name;
 };
+window.ekPreviewFile = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const label = document.getElementById("ek-foto-label");
+  if (label) label.textContent = file.name;
+  const preview = document.getElementById("ek-foto-preview");
+  const img = document.getElementById("ek-foto-img");
+  if (preview && img) {
+    img.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+    initCropDragIfCrop(preview, img);
+  }
+};
 window.renderEditKon = function(id) {
   const k = konie.find(k => k.id === id);
   if (!k) return;
@@ -678,7 +696,13 @@ window.renderEditKon = function(id) {
     </select>
     <label class="f">Charakterystyka</label>
     <textarea class="f" id="ek-opis" rows="3">${esc(k.opis)}</textarea>
-    <label class="f">Zdjęcie (URL)</label>
+    <label class="f">Zdjęcie — wgraj z komputera</label>
+    <div class="foto-upload-box" id="ek-foto-box" onclick="document.getElementById('ek-plik').click()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <span id="ek-foto-label">Dotknij, aby wybrać zdjęcie</span>
+      <input type="file" id="ek-plik" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="ekPreviewFile(this)" />
+    </div>
+    <label class="f" style="margin-top:12px">…lub wklej link do zdjęcia</label>
     <input class="f" id="ek-foto" type="text" value="${esc(k.foto)}" placeholder="https://..." oninput="ekFotoLive()" />
     <label class="f">Tryb wyświetlania zdjęcia</label>
     <div class="seg" id="ek-fit-seg">
@@ -687,7 +711,7 @@ window.renderEditKon = function(id) {
       <button class="${(k.fit||'cover')==='fill'?'on':''}" onclick="ustawFit(event,'fill')">Fill</button>
     </div>
     <div id="ek-foto-preview" style="margin-top:10px;border-radius:16px;overflow:hidden;height:200px;background:var(--sage-mist);position:relative;${k.foto?'':'display:none'}">
-      <img id="ek-foto-img" src="${esc(k.foto)}" style="width:100%;height:100%;object-fit:${k.fit||'cover'};object-position:${k.pos||'50% 50%'}" data-pos="${k.pos||'50% 50%'}" onerror="this.parentElement.style.display='none'" />
+      <img id="ek-foto-img" src="${esc(k.foto)}" style="width:100%;height:100%;object-fit:${esc(k.fit||'cover')};object-position:${esc(k.pos||'50% 50%')}" data-pos="${esc(k.pos||'50% 50%')}" onerror="this.parentElement.style.display='none'" />
       <div id="ek-crop-hint" style="display:${(k.fit||'cover')==='cover'?'flex':'none'};position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;pointer-events:none;gap:5px;align-items:center;white-space:nowrap">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
         Przeciągnij żeby wykadrować
@@ -712,12 +736,23 @@ window.zapiszEdycjeKonia = async (id) => {
   if (!imie) { alert("Podaj imię konia."); return; }
   const btn = document.querySelector(".btn-primary");
   btn.disabled = true; btn.textContent = "Zapisywanie...";
+  let fotoUrl = document.getElementById("ek-foto").value.trim() || null;
+  const plik = document.getElementById("ek-plik")?.files[0];
+  if (plik) {
+    // Zdjęcie trafia do Supabase Storage (bucket "konie") — w Strapi zapisujemy tylko link.
+    const ext = plik.name.split(".").pop();
+    const path = `${Date.now()}-${imie.replace(/\s+/g, "-")}.${ext}`;
+    const { error: upErr } = await db.storage.from("konie").upload(path, plik, { contentType: plik.type });
+    if (upErr) { alert("Błąd przesyłania zdjęcia: " + upErr.message); btn.disabled = false; btn.textContent = "Zapisz zmiany"; return; }
+    const { data } = db.storage.from("konie").getPublicUrl(path);
+    fotoUrl = data.publicUrl;
+  }
   try {
     await strapi("PUT", `/api/konie/${id}`, {
       imie,
       typ: document.getElementById("ek-typ").value,
       charakterystyka: document.getElementById("ek-opis").value.trim() || null,
-      foto_url: document.getElementById("ek-foto").value.trim() || null,
+      foto_url: fotoUrl,
       foto_fit: document.querySelector('#ek-fit-seg .on')?.textContent === 'Crop' ? 'cover' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fit' ? 'contain' : document.querySelector('#ek-fit-seg .on')?.textContent === 'Fill' ? 'fill' : 'cover',
       foto_position: document.getElementById('ek-foto-img')?.dataset?.pos || '50% 50%'
     });
