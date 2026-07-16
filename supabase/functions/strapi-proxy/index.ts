@@ -19,11 +19,17 @@ function json(data: unknown, status = 200) {
 const ALLOWED_METHODS = new Set(["GET", "POST", "PUT", "DELETE"]);
 const ALLOWED_PATH = /^\/api\/(jezdzcy|konie|treningi|cwiczenia|jezdziec-konie)(\/|\?|$)/;
 
+// Adres Strapi wpisany na stałe (to publiczny URL, nie sekret) — eliminuje
+// błędy wynikające z literówki/spacji w sekrecie STRAPI_URL.
+const STRAPI_URL = "https://strapi-production-6bf4.up.railway.app";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  let stage = "start";
   try {
     // 1. Autoryzacja — tylko zalogowany użytkownik Supabase
+    stage = "auth";
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.replace("Bearer ", "").trim();
     if (!token) return json({ error: "Brak tokenu autoryzacji" }, 401);
@@ -35,14 +41,15 @@ Deno.serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) return json({ error: "Nieautoryzowany" }, 401);
 
-    // 2. Konfiguracja Strapi z sekretów funkcji
-    const STRAPI_URL = Deno.env.get("STRAPI_URL");
-    const STRAPI_TOKEN = Deno.env.get("STRAPI_TOKEN");
-    if (!STRAPI_URL || !STRAPI_TOKEN) {
-      return json({ error: "Konfiguracja serwera: brak STRAPI_URL lub STRAPI_TOKEN" }, 500);
+    // 2. Token Strapi z sekretu funkcji
+    stage = "config";
+    const STRAPI_TOKEN = (Deno.env.get("STRAPI_TOKEN") || "").trim();
+    if (!STRAPI_TOKEN) {
+      return json({ error: "Konfiguracja serwera: brak sekretu STRAPI_TOKEN" }, 500);
     }
 
     // 3. Walidacja żądania
+    stage = "validate";
     const { method, path, data } = await req.json();
     const m = String(method || "").toUpperCase();
     if (!ALLOWED_METHODS.has(m)) return json({ error: `Niedozwolona metoda: ${method}` }, 400);
@@ -51,6 +58,7 @@ Deno.serve(async (req) => {
     }
 
     // 4. Przekazanie do Strapi z tokenem po stronie serwera
+    stage = "fetch";
     const upstream = await fetch(`${STRAPI_URL}${path}`, {
       method: m,
       headers: {
@@ -63,11 +71,15 @@ Deno.serve(async (req) => {
     });
 
     const text = await upstream.text();
+    if (!upstream.ok) {
+      console.error("Strapi upstream error", upstream.status, path, text.slice(0, 500));
+    }
     return new Response(text, {
       status: upstream.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return json({ error: String(err) }, 500);
+    console.error("strapi-proxy exception", stage, String(err));
+    return json({ error: `[${stage}] ${String(err)}` }, 500);
   }
 });
