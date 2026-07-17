@@ -19,6 +19,11 @@ function json(data: unknown, status = 200) {
 const ALLOWED_METHODS = new Set(["GET", "POST", "PUT", "DELETE"]);
 const ALLOWED_PATH = /^\/api\/(jezdzcy|konie|treningi|cwiczenia|jezdziec-konie)(\/|\?|$)/;
 
+// Statusy, które NIE mogą mieć ciała odpowiedzi (spec Fetch/Deno).
+// Strapi zwraca 204 przy udanym DELETE — bez tego wyjątku Response rzuca
+// "Response with null body status cannot have body".
+const NULL_BODY_STATUS = new Set([101, 204, 205, 304]);
+
 // Adres Strapi wpisany na stałe (to publiczny URL, nie sekret) — eliminuje
 // błędy wynikające z literówki/spacji w sekrecie STRAPI_URL.
 const STRAPI_URL = "https://strapi-production-6bf4.up.railway.app";
@@ -74,7 +79,9 @@ Deno.serve(async (req) => {
     if (!upstream.ok) {
       console.error("Strapi upstream error", upstream.status, path, text.slice(0, 500));
     }
-    return new Response(text, {
+    // Statusy bez ciała (np. 204 po DELETE) muszą mieć body === null.
+    const respBody = NULL_BODY_STATUS.has(upstream.status) ? null : text;
+    return new Response(respBody, {
       status: upstream.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
